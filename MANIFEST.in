@@ -1,0 +1,5 @@
+include LICENSE
+include README.rst
+
+recursive-include src/vivarium_csu_sanofi_multiple_myeloma *.py *.yaml *.ipynb
+recursive-include tests *.py *txt *.yaml
