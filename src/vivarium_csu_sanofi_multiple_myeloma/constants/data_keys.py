@@ -33,16 +33,16 @@ POPULATION = __Population()
 # TODO - sample key group used to identify keys in model
 # For more information see the tutorial:
 # https://vivarium-inputs.readthedocs.io/en/latest/tutorials/pulling_data.html#entity-measure-data
-class __SomeDisease(NamedTuple):
+class __MultipleMyeloma(NamedTuple):
 
     # Keys that will be loaded into the artifact. must have a colon type declaration
-    SOME_DISEASE_PREVALENCE: TargetString = TargetString('cause.some_disease.prevalence')
-    SOME_DISEASE_INCIDENCE_RATE: TargetString = TargetString('cause.some_disease.incidence_rate')
-    SOME_DISEASE_REMISSION_RATE: TargetString = TargetString('cause.some_disease.remission_rate')
-    DISABILITY_WEIGHT: TargetString = TargetString('cause.some_disease.disability_weight')
-    EMR: TargetString = TargetString('cause.some_disease.excess_mortality_rate')
-    CSMR: TargetString = TargetString('cause.some_disease.cause_specific_mortality_rate')
-    RESTRICTIONS: TargetString = TargetString('cause.some_disease.restrictions')
+    MULTIPLE_MYELOMA_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma.prevalence')
+    MULTIPLE_MYELOMA_INCIDENCE_RATE: TargetString = TargetString('cause.multiple_myeloma.incidence_rate')
+    MULTIPLE_MYELOMA_REMISSION_RATE: TargetString = TargetString('cause.multiple_myeloma.remission_rate')
+    DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma.disability_weight')
+    EMR: TargetString = TargetString('cause.multiple_myeloma.excess_mortality_rate')
+    CSMR: TargetString = TargetString('cause.multiple_myeloma.cause_specific_mortality_rate')
+    RESTRICTIONS: TargetString = TargetString('cause.multiple_myeloma.restrictions')
 
     # Useful keys not for the artifact - distinguished by not using the colon type declaration
     RAW_DISEASE_PREVALENCE = TargetString('sequela.raw_disease.prevalence')
@@ -50,14 +50,14 @@ class __SomeDisease(NamedTuple):
 
     @property
     def name(self):
-        return 'some_disease'
+        return 'multiple_myeloma'
 
     @property
     def log_name(self):
-        return 'some disease'
+        return 'multiple myeloma'
 
 
-SOME_DISEASE = __SomeDisease()
+MULTIPLE_MYELOMA = __MultipleMyeloma()
 
 MAKE_ARTIFACT_KEY_GROUPS = [
     POPULATION,

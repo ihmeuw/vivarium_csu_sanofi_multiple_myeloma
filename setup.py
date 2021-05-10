@@ -17,7 +17,7 @@ if __name__ == "__main__":
         long_description = f.read()
 
     install_requirements = [
-        'vivarium==0.10.4',
+        'vivarium>=0.10.4',
         'vivarium_public_health==0.10.9',
 
         'click',
