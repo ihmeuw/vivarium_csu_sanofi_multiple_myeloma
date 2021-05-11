@@ -17,7 +17,7 @@ configuration:
         artifact_path: '/share/costeffectiveness/artifacts/vivarium_csu_sanofi_multiple_myeloma/united_states_of_america.hdf'
     interpolation:
         order: 0
-        extrapolate: False
+        extrapolate: True
     randomness:
         map_size: 1_000_000
         key_columns: ['entrance_time', 'age']
