@@ -13,6 +13,8 @@ components:
 configuration:
     input_data:
         input_draw_number: 0
+        location: 'United States of America'
+        artifact_path: '/share/costeffectiveness/artifacts/vivarium_csu_sanofi_multiple_myeloma/united_states_of_america.hdf'
     interpolation:
         order: 0
         extrapolate: False
