@@ -43,6 +43,6 @@ configuration:
             by_sex: False
             by_year: False
         mortality:
-            by_age: False
-            by_sex: False
-            by_year: False
+            by_age: True
+            by_sex: True
+            by_year: True
