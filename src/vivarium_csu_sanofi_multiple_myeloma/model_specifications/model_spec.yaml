@@ -3,9 +3,9 @@ components:
         population:
             - BasePopulation()
             - Mortality()
-#        metrics:
+        metrics:
 #            - DisabilityObserver()
-#            - MortalityObserver()
+            - MortalityObserver()
 
     # Causes an error if left empty. Uncomment when you have components. 
     # vivarium_csu_sanofi_multiple_myeloma.components:
