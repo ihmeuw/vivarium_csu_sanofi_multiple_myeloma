@@ -28,11 +28,12 @@ def make_measure_data(data):
         population=get_population_data(data),
         person_time=get_measure_data(data, 'person_time'),
         ylls=get_by_cause_measure_data(data, 'ylls'),
-        ylds=get_by_cause_measure_data(data, 'ylds'),
+        # TODO uncomment ylds and disease_* here and in MeasureData class
+        # ylds=get_by_cause_measure_data(data, 'ylds'),
         deaths=get_by_cause_measure_data(data, 'deaths'),
         # TODO duplicate for each model
-        disease_state_person_time=get_state_person_time_measure_data(data, 'disease_state_person_time'),
-        disease_transition_count=get_transition_count_measure_data(data, 'disease_transition_count'),
+        # disease_state_person_time=get_state_person_time_measure_data(data, 'disease_state_person_time'),
+        # disease_transition_count=get_transition_count_measure_data(data, 'disease_transition_count'),
     )
     return measure_data
 
@@ -41,11 +42,11 @@ class MeasureData(NamedTuple):
     population: pd.DataFrame
     person_time: pd.DataFrame
     ylls: pd.DataFrame
-    ylds: pd.DataFrame
+    # ylds: pd.DataFrame
     deaths: pd.DataFrame
     # TODO duplicate for each model
-    disease_state_person_time: pd.DataFrame
-    disease_transition_count: pd.DataFrame
+    # disease_state_person_time: pd.DataFrame
+    # disease_transition_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
@@ -122,6 +123,8 @@ def sort_data(data):
 
 def split_processing_column(data):
     # TODO the required splitting here is dependant on what types of stratification exist in the model
+    # TODO find a better way to do this:
+    #       FutureWarning: Columnar iteration over characters will be deprecated in future releases.
     data['process'], data['age'] = data.process.str.split('_in_age_group').str
     data['process'], data['sex'] = data.process.str.split('_among_').str
     data['year'] = data.process.str.split('_in_').str[-1]
