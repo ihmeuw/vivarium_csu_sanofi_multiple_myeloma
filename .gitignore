@@ -125,6 +125,3 @@ dmypy.json
 
 # Pycharm project settings
 .idea/
-
-# Model specification files
-src/vivarium_csu_sanofi_multiple_myeloma/model_specifications/*.yaml

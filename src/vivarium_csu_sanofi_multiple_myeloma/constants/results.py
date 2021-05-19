@@ -46,10 +46,26 @@ NON_COUNT_TEMPLATES = [
 
 POP_STATES = ('living', 'dead', 'tracked', 'untracked')
 SEXES = ('male', 'female')
-# TODO - add literals for years in the model
-YEARS = ()
-# TODO - add literals for ages in the model
-AGE_GROUPS = ()
+YEARS = tuple(range(2021, 2027))
+AGE_GROUPS = (
+    '15_to_19',
+    '20_to_24',
+    '25_to_29',
+    '30_to_34',
+    '35_to_39',
+    '40_to_44',
+    '45_to_49',
+    '50_to_54',
+    '55_to_59',
+    '60_to_64',
+    '65_to_69',
+    '70_to_74',
+    '75_to_79',
+    '80_to_84',
+    '85_to_89',
+    '90_to_94',
+    '95_plus',
+)
 # TODO - add causes of death
 CAUSES_OF_DEATH = (
     'other_causes',
