@@ -69,12 +69,11 @@ AGE_GROUPS = (
 # TODO - add causes of death
 CAUSES_OF_DEATH = (
     'other_causes',
-    # models.FIRST_STATE_NAME,
+    models.MULTIPLE_MYELOMA_MODEL_NAME
 )
 # TODO - add causes of disability
 CAUSES_OF_DISABILITY = (
-    # models.FIRST_STATE_NAME,
-    # models.SECOND_STATE_NAME,
+    models.MULTIPLE_MYELOMA_MODEL_NAME,
 )
 
 TEMPLATE_FIELD_MAP = {
@@ -105,4 +104,3 @@ def RESULT_COLUMNS(kind='all'):
         for value_group in value_groups:
             columns.append(template.format(**{field: value for field, value in zip(fields, value_group)}))
     return columns
-

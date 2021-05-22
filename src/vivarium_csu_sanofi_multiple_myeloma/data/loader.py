@@ -47,14 +47,12 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
         data_keys.POPULATION.ACMR: load_standard_data,
 
-        # TODO - add appropriate mappings
-        # data_keys.DIARRHEA_PREVALENCE: load_standard_data,
-        # data_keys.DIARRHEA_INCIDENCE_RATE: load_standard_data,
-        # data_keys.DIARRHEA_REMISSION_RATE: load_standard_data,
-        # data_keys.DIARRHEA_CAUSE_SPECIFIC_MORTALITY_RATE: load_standard_data,
-        # data_keys.DIARRHEA_EXCESS_MORTALITY_RATE: load_standard_data,
-        # data_keys.DIARRHEA_DISABILITY_WEIGHT: load_standard_data,
-        # data_keys.DIARRHEA_RESTRICTIONS: load_metadata,
+        data_keys.MULTIPLE_MYELOMA.PREVALENCE: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.INCIDENCE_RATE: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.DISABILITY_WEIGHT: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.EMR: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.CSMR: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.RESTRICTIONS: load_metadata,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -62,7 +60,6 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
 def load_population_location(key: str, location: str) -> str:
     if key != data_keys.POPULATION.LOCATION:
         raise ValueError(f'Unrecognized key {key}')
-
     return location
 
 
