@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     install_requirements = [
         'vivarium>=0.10.4',
-        'vivarium_public_health>=0.10.9',
+        'vivarium_public_health>=0.10.11',
 
         'click',
         'gbd_mapping>=3.0.0, <4.0.0',
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     # use "pip install -e .[dev]" to install required components + extra components
     extras_require = [
-        'vivarium_cluster_tools==1.2.3',
+        'vivarium_cluster_tools>=1.2.4',
         'vivarium_inputs[data]==4.0.2',
     ]
 

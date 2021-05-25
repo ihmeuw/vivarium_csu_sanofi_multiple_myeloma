@@ -36,17 +36,16 @@ POPULATION = __Population()
 class __MultipleMyeloma(NamedTuple):
 
     # Keys that will be loaded into the artifact. must have a colon type declaration
-    MULTIPLE_MYELOMA_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma.prevalence')
-    MULTIPLE_MYELOMA_INCIDENCE_RATE: TargetString = TargetString('cause.multiple_myeloma.incidence_rate')
-    MULTIPLE_MYELOMA_REMISSION_RATE: TargetString = TargetString('cause.multiple_myeloma.remission_rate')
+    PREVALENCE: TargetString = TargetString('cause.multiple_myeloma.prevalence')
+    INCIDENCE_RATE: TargetString = TargetString('cause.multiple_myeloma.incidence_rate')
     DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma.disability_weight')
     EMR: TargetString = TargetString('cause.multiple_myeloma.excess_mortality_rate')
     CSMR: TargetString = TargetString('cause.multiple_myeloma.cause_specific_mortality_rate')
     RESTRICTIONS: TargetString = TargetString('cause.multiple_myeloma.restrictions')
 
     # Useful keys not for the artifact - distinguished by not using the colon type declaration
-    RAW_DISEASE_PREVALENCE = TargetString('sequela.raw_disease.prevalence')
-    RAW_DISEASE_INCIDENCE_RATE = TargetString('sequela.raw_disease.incidence_rate')
+    # RAW_DISEASE_PREVALENCE = TargetString('sequela.raw_disease.prevalence')
+    # RAW_DISEASE_INCIDENCE_RATE = TargetString('sequela.raw_disease.incidence_rate')
 
     @property
     def name(self):
@@ -61,6 +60,5 @@ MULTIPLE_MYELOMA = __MultipleMyeloma()
 
 MAKE_ARTIFACT_KEY_GROUPS = [
     POPULATION,
-    # TODO: list all key groups here
-    # SOME_DISEASE
+    MULTIPLE_MYELOMA
 ]
