@@ -91,8 +91,8 @@ def get_results(input_dir: str, survival_outcome_type: str, line: str) -> pd.Dat
 
 
 if __name__ == '__main__':
-input_dir = '/home/j/Project/simulation_science/multiple_myeloma/data/treatment_landscape/braunlin_et_al_2020'
-output_dir = '/home/j/Project/simulation_science/multiple_myeloma/data/cause_model_input'
+	input_dir = '/home/j/Project/simulation_science/multiple_myeloma/data/treatment_landscape/braunlin_et_al_2020'
+	output_dir = '/home/j/Project/simulation_science/multiple_myeloma/data/cause_model_input'
 	for line in ['First-line', 'Second-line', 'Third-line', 'Fourth-line', 'Fifth-line']:
 		df_mortality = get_results('overall_survival', line)
 		df_mortality.to_csv(os.path.join(output_dir, f'/mortality {line}.csv'), index=False)
