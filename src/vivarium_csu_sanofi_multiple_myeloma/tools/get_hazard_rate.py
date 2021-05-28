@@ -6,7 +6,7 @@ from scipy import interpolate
 def calc_events(N: pd.Series, S: pd.Series) -> pd.Series:
     """
     The Kaplan-Meier estimator of survival function is given by
-    S(t) = product_{i:ti<=t}(1 - D_i / Ni)
+    S(t) = product_{i:t_i<=t}(1 - D_i / N_i)
     Where S is event-free probability, D is number of events, and N is number of observations
     Assume S(t+10) = S(t) * ((N(t+10) - D(t+10)) / N(t+10))
     solve for D
@@ -22,7 +22,7 @@ def calc_hazard_rate(D: pd.Series, N: pd.Series) -> pd.Series:
 def calc_variance(S: pd.Series, D: pd.Series, N: pd.Series, num: int) -> list:
     """
     Greenwood's formula:
-    Var_S(t) = S(t)^2 * product_{i:t_i<=t}(D(t) / (N(t) * (N(t) - D(t))))
+    Var_S(t) = S(t)^2 * product_{i:t_i<=t}(D_i / (N_i * (N_i - D_i)))
     """
     Var_S = [np.nan] # set variance equal to NaN when t = 0
     Values = []
@@ -38,7 +38,7 @@ def calc_variance(S: pd.Series, D: pd.Series, N: pd.Series, num: int) -> list:
 
 def get_S_draws(S: pd.Series, Var_S: list, num: int) -> pd.DataFrame:
     """
-    Sample 1000 draws of S(t) from Normal(S(t), sqrt(var_S(t))) for each t
+    Sample 1000 draws of S(t) from Normal(mean=S(t), sd=sqrt(var_S(t))) for each t
     """
     df = pd.DataFrame({'t_0': [1]*1000})
     for i in range(1, num, 1):
@@ -80,14 +80,13 @@ def get_results(input_dir: str, survival_outcome_type: str, line: str) -> pd.Dat
     t = data['Time in months, t']
     num = len(t)
     N = data['Number at risk, N(t)']
-
     S = data[s_name]
     D = calc_events(N, S)
     Var_S = calc_variance(S, D, N, num)
     S_draws = get_S_draws(S, Var_S, num)
     H_draws = get_H_draws(N, S_draws)
-    results = interp(measure, t, H_draws)
-    return results
+    res = interp(measure, t, H_draws)
+    return res
 
 
 if __name__ == '__main__':
