@@ -22,17 +22,16 @@ def calc_hazard_rate(D: pd.Series, N: pd.Series) -> pd.Series:
 def calc_variance(S: pd.Series, D: pd.Series, N: pd.Series, num: int) -> list:
     """
     Greenwood's formula:
-    Var_S(t) = S(t)^2 * product_{i:t_i<=t}(D_i / (N_i * (N_i - D_i)))
+    Var_S(t) = S(t)^2 * sum_{i:t_i<=t}(D_i / (N_i * (N_i - D_i)))
     """
     Var_S = [np.nan] # set variance equal to NaN when t = 0
-    Values = []
+    val = 0
     for i in range(1, num, 1):
         S_i = S.loc[i]
         D_i = D.loc[i]
         N_i = N.loc[i]
-        val = D_i / (N_i * (N_i - D_i))
-        Values.append(val)
-        Var_S_i = S_i ** 2 * np.product(Values)
+        val += D_i / (N_i * (N_i - D_i))
+        Var_S_i = S_i ** 2 * val
         Var_S.append(Var_S_i)
     return Var_S
 
