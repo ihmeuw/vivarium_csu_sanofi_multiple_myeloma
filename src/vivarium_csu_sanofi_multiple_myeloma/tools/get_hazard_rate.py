@@ -73,7 +73,7 @@ def get_results(input_dir: str, survival_outcome_type: str, line: str) -> pd.Dat
     else:
         s_name = 'Progression-free probability, P(t)'
         measure = 'incidence'
-    data = pd.read_excel(os.path.join(input_dir, f'/{survival_outcome_type}_by_time.xlsx'),
+    data = pd.read_excel(os.path.join(input_dir, f'{survival_outcome_type}_by_time.xlsx'),
                          sheet_name = line,
                          engine = 'openpyxl')
     t = data['Time in months, t']
@@ -93,6 +93,6 @@ if __name__ == '__main__':
 	output_dir = '/home/j/Project/simulation_science/multiple_myeloma/data/cause_model_input'
 	for line in ['First-line', 'Second-line', 'Third-line', 'Fourth-line', 'Fifth-line']:
 		df_mortality = get_results(input_dir, 'overall_survival', line)
-		df_mortality.to_csv(os.path.join(output_dir, f'/mortality {line}.csv'), index=False)
+		df_mortality.to_csv(os.path.join(output_dir, f'mortality {line}.csv'), index=False)
 		df_incidence = get_results(input_dir, 'progression_free_survival', line)
-		df_incidence.to_csv(os.path.join(output_dir, f'/incidence {line}.csv'), index=False)
+		df_incidence.to_csv(os.path.join(output_dir, f'incidence {line}.csv'), index=False)
