@@ -54,14 +54,14 @@ def get_H_draws(N: pd.Series, S_data: pd.DataFrame) -> pd.DataFrame:
         df[f'draw_{draw}'] = H
     return df
 
-def interp(measure: str, t_data: pd.Series, hazard_data: pd.DataFrame, duration=60, step=28/30, k=3) -> pd.DataFrame:
+def interp(measure: str, t_data: pd.Series, hazard_data: pd.DataFrame, duration=60, step=28/30) -> pd.DataFrame:
     t_target = np.arange(0, duration, step)
     t_step_start = np.arange(0, len(t_target), 1)
     t_step_end = t_step_start + 1
     df = pd.DataFrame({'t_start': t_step_start, 't_end': t_step_end})
     for i in range(1000):
         h_data = hazard_data[f'draw_{i}']
-        h = interpolate.UnivariateSpline(t_data[1:], h_data[1:], k=k) # cubic
+        h = interpolate.interp1d(t_data[1:], h_data[1:], kind='nearest', fill_value='extrapolate') # piece-wise constant
         val = h(t_target)
         df[f'{measure}_draw_{i}'] = val
     return df
