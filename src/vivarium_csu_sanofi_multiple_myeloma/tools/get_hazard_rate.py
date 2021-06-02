@@ -15,7 +15,7 @@ def calc_events(N: pd.Series, S: pd.Series) -> pd.Series:
     return D
 
 def calc_hazard_rate(D: pd.Series, N: pd.Series) -> pd.Series:
-    # R is noted as events per person-year
+    # H is noted as events per patient-year
     H = D / (N * (10 / 12)) # time_interval = 10 months
     return H
 
