@@ -42,7 +42,7 @@ def get_S_draws(S: pd.Series, Var_S: list, num: int) -> pd.DataFrame:
     df = pd.DataFrame({'t_0': [1]*1000})
     for i in range(1, num, 1):
         S_i = np.random.normal(loc=S.loc[i], scale=np.sqrt(Var_S[i]), size=1000)
-        df[f't_{i*10}'] = S_i
+        df[f't_{i*10}'] = np.clip(S_i, 0, df[f't_{(i-1)*10}']) # 0 <= S(t) <= S(t-1)  
     return df.transpose().reset_index(drop=True)
 
 def get_H_draws(N: pd.Series, S_data: pd.DataFrame) -> pd.DataFrame:
