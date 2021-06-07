@@ -10,4 +10,4 @@ MODEL_SPEC_DIR = BASE_DIR / 'model_specifications'
 RESULTS_ROOT = Path(f'/share/costeffectiveness/results/{metadata.PROJECT_NAME}/')
 
 CSV_RAW_DATA_ROOT = BASE_DIR / 'data' / 'raw_data'
-MORTALITY_FIRST_LINE_PATH = CSV_RAW_DATA_ROOT / 'mortality_first_line_mockup.csv'
+MORTALITY_FIRST_LINE_PATH = CSV_RAW_DATA_ROOT / 'mortality First-line.csv'
