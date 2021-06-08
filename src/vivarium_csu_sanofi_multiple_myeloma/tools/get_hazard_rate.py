@@ -54,25 +54,23 @@ def get_H_draws(N: pd.Series, S_data: pd.DataFrame) -> pd.DataFrame:
         df[f'draw_{draw}'] = H
     return df
 
-def interp(measure: str, t_data: pd.Series, hazard_data: pd.DataFrame, duration=60, step=28/30) -> pd.DataFrame:
+def interp(t_data: pd.Series, hazard_data: pd.DataFrame, duration=60, step=1/30) -> pd.DataFrame:
     t_target = np.arange(0, duration, step)
     t_step_start = np.arange(0, len(t_target), 1)
     t_step_end = t_step_start + 1
-    df = pd.DataFrame({'t_start': t_step_start, 't_end': t_step_end})
+    df = pd.DataFrame({'time_since_entrance_start': t_step_start, 'time_since_entrance_end': t_step_end})
     for i in range(1000):
         h_data = hazard_data[f'draw_{i}']
         h = interpolate.interp1d(t_data[1:], h_data[1:], kind='nearest', fill_value='extrapolate') # piece-wise constant
         val = h(t_target)
-        df[f'{measure}_draw_{i}'] = val
+        df[f'draw_{i}'] = val
     return df
 
 def get_results(input_dir: str, survival_outcome_type: str, line: str) -> pd.DataFrame:
     if survival_outcome_type == 'overall_survival':
         s_name = 'Survival probability, S(t)'
-        measure = 'mortality'
     else:
         s_name = 'Progression-free probability, P(t)'
-        measure = 'incidence'
     data = pd.read_excel(os.path.join(input_dir, f'{survival_outcome_type}_by_time.xlsx'),
                          sheet_name = line,
                          engine = 'openpyxl')
@@ -84,7 +82,7 @@ def get_results(input_dir: str, survival_outcome_type: str, line: str) -> pd.Dat
     Var_S = calc_variance(S, D, N, num)
     S_draws = get_S_draws(S, Var_S, num)
     H_draws = get_H_draws(N, S_draws)
-    res = interp(measure, t, H_draws)
+    res = interp(t, H_draws)
     return res
 
 
