@@ -20,7 +20,7 @@ from vivarium_gbd_access import gbd
 from vivarium_inputs import globals as vi_globals, interface, utilities as vi_utils, utility_data
 from vivarium_inputs.mapping_extension import alternative_risk_factors
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import data_keys
+from vivarium_csu_sanofi_multiple_myeloma.constants import data_keys, models
 
 
 def get_data(lookup_key: str, location: str) -> pd.DataFrame:
@@ -47,12 +47,29 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.POPULATION.TMRLE: load_theoretical_minimum_risk_life_expectancy,
         data_keys.POPULATION.ACMR: load_standard_data,
 
-        data_keys.MULTIPLE_MYELOMA.PREVALENCE: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_1_STATE_NAME),
         data_keys.MULTIPLE_MYELOMA.INCIDENCE_RATE: load_standard_data,
-        data_keys.MULTIPLE_MYELOMA.DISABILITY_WEIGHT: load_standard_data,
-        data_keys.MULTIPLE_MYELOMA.EMR: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.DISABILITY_WEIGHT: load_rrmm_disability_weight,
         data_keys.MULTIPLE_MYELOMA.CSMR: load_standard_data,
         data_keys.MULTIPLE_MYELOMA.RESTRICTIONS: load_metadata,
+
+        data_keys.MULTIPLE_MYELOMA.LINE_1_PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_1_STATE_NAME),
+        data_keys.MULTIPLE_MYELOMA.LINE_2_PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_2_STATE_NAME),
+        data_keys.MULTIPLE_MYELOMA.LINE_3_PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_3_STATE_NAME),
+        data_keys.MULTIPLE_MYELOMA.LINE_4_PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_4_STATE_NAME),
+        data_keys.MULTIPLE_MYELOMA.LINE_5_PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_5_STATE_NAME),
+
+        data_keys.MULTIPLE_MYELOMA.LINE_1_DISABILITY_WEIGHT: load_rrmm_disability_weight,
+        data_keys.MULTIPLE_MYELOMA.LINE_2_DISABILITY_WEIGHT: load_rrmm_disability_weight,
+        data_keys.MULTIPLE_MYELOMA.LINE_3_DISABILITY_WEIGHT: load_rrmm_disability_weight,
+        data_keys.MULTIPLE_MYELOMA.LINE_4_DISABILITY_WEIGHT: load_rrmm_disability_weight,
+        data_keys.MULTIPLE_MYELOMA.LINE_5_DISABILITY_WEIGHT: load_rrmm_disability_weight,
+
+        data_keys.MULTIPLE_MYELOMA.LINE_1_EMR: load_rrmm_emr,
+        data_keys.MULTIPLE_MYELOMA.LINE_2_EMR: load_rrmm_emr,
+        data_keys.MULTIPLE_MYELOMA.LINE_3_EMR: load_rrmm_emr,
+        data_keys.MULTIPLE_MYELOMA.LINE_4_EMR: load_rrmm_emr,
+        data_keys.MULTIPLE_MYELOMA.LINE_5_EMR: load_rrmm_emr,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -108,7 +125,26 @@ def _load_em_from_meid(location, meid, measure):
 
 
 # TODO - add project-specific data functions here
+def load_rrmm_prevalence(state: str):
+    state_multipliers = {
+        models.MULTIPLE_MYELOMA_1_STATE_NAME: 1.,
+        models.MULTIPLE_MYELOMA_2_STATE_NAME: 0.,
+        models.MULTIPLE_MYELOMA_3_STATE_NAME: 0.,
+        models.MULTIPLE_MYELOMA_4_STATE_NAME: 0.,
+        models.MULTIPLE_MYELOMA_5_STATE_NAME: 0.,
+    }
 
+    def _load_rrmm_prevalence(key, location):
+        return load_standard_data('cause.multiple_myeloma.prevalence', location) * state_multipliers[state]
+    return _load_rrmm_prevalence
+
+
+def load_rrmm_disability_weight(key: str, location):
+    return load_standard_data('cause.multiple_myeloma.disability_weight', location)
+
+
+def load_rrmm_emr(key: str, location):
+    return load_standard_data('cause.multiple_myeloma.excess_mortality_rate', location)
 
 def get_entity(key: str):
     # Map of entity types to their gbd mappings.

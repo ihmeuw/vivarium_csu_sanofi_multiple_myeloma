@@ -3,15 +3,16 @@ components:
         population:
             - BasePopulation()
             - Mortality()
-        disease:
-            - SI('multiple_myeloma')
+#        disease:
+#            - SI('multiple_myeloma')
         metrics:
             - DisabilityObserver()
             - MortalityObserver()
             - DiseaseObserver('multiple_myeloma')
 
     # Causes an error if left empty. Uncomment when you have components. 
-    # vivarium_csu_sanofi_multiple_myeloma.components:
+    vivarium_csu_sanofi_multiple_myeloma.components:
+        - MultipleMyeloma()
 
 configuration:
     input_data:

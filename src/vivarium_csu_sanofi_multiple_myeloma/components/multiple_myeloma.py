@@ -112,17 +112,8 @@ def MultipleMyeloma():
         source_data_type="hazard_rate"
     )
 
-    mm_3 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_3_STATE_NAME
-    )
-    mm_2.allow_self_transitions()
-    mm_2.add_transition(
-        mm_3,
-        source_data_type="hazard_rate"
-    )
-
     mm_4 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_3_STATE_NAME
+        models.MULTIPLE_MYELOMA_4_STATE_NAME
     )
     mm_3.allow_self_transitions()
     mm_3.add_transition(
@@ -131,7 +122,7 @@ def MultipleMyeloma():
     )
 
     mm_5 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_3_STATE_NAME
+        models.MULTIPLE_MYELOMA_5_STATE_NAME
     )
     mm_4.allow_self_transitions()
     mm_4.add_transition(

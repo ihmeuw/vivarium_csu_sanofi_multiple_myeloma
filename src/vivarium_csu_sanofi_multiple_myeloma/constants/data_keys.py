@@ -39,9 +39,28 @@ class __MultipleMyeloma(NamedTuple):
     PREVALENCE: TargetString = TargetString('cause.multiple_myeloma.prevalence')
     INCIDENCE_RATE: TargetString = TargetString('cause.multiple_myeloma.incidence_rate')
     DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma.disability_weight')
-    EMR: TargetString = TargetString('cause.multiple_myeloma.excess_mortality_rate')
     CSMR: TargetString = TargetString('cause.multiple_myeloma.cause_specific_mortality_rate')
     RESTRICTIONS: TargetString = TargetString('cause.multiple_myeloma.restrictions')
+
+    LINE_1_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma_1.prevalence')
+    LINE_1_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_1.disability_weight')
+    LINE_1_EMR: TargetString = TargetString('cause.multiple_myeloma_1.excess_mortality_rate')
+
+    LINE_2_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma_2.prevalence')
+    LINE_2_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_2.disability_weight')
+    LINE_2_EMR: TargetString = TargetString('cause.multiple_myeloma_2.excess_mortality_rate')
+
+    LINE_3_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma_3.prevalence')
+    LINE_3_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_3.disability_weight')
+    LINE_3_EMR: TargetString = TargetString('cause.multiple_myeloma_3.excess_mortality_rate')
+
+    LINE_4_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma_4.prevalence')
+    LINE_4_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_4.disability_weight')
+    LINE_4_EMR: TargetString = TargetString('cause.multiple_myeloma_4.excess_mortality_rate')
+
+    LINE_5_PREVALENCE: TargetString = TargetString('cause.multiple_myeloma_5.prevalence')
+    LINE_5_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_5.disability_weight')
+    LINE_5_EMR: TargetString = TargetString('cause.multiple_myeloma_5.excess_mortality_rate')
 
     # Useful keys not for the artifact - distinguished by not using the colon type declaration
     # RAW_DISEASE_PREVALENCE = TargetString('sequela.raw_disease.prevalence')
