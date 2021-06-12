@@ -3,8 +3,6 @@ components:
         population:
             - BasePopulation()
             - Mortality()
-#        disease:
-#            - SI('multiple_myeloma')
         metrics:
             - DisabilityObserver()
             - MortalityObserver()

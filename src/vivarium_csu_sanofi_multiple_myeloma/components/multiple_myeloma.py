@@ -1,6 +1,6 @@
 from datetime import timedelta
 import pandas as pd
-#from typing import Union
+from typing import Union
 import typing
 
 from vivarium_public_health.disease import (DiseaseState, DiseaseModel, SusceptibleState,
@@ -39,11 +39,9 @@ class DiseaseStateHazard(DiseaseState):
 
     def setup(self, builder: 'Builder'):
         super().setup(builder)
-
         builder.event.register_listener('time_step', self.on_time_step)
 
         hazard_rate_data = load_hazard_rate(builder, self.state_id, "mortality")
-
         # noinspection PyAttributeOutsideInit
         self.hazard_rate = builder.lookup.build_table(
             hazard_rate_data, parameter_columns=[self.time_since_entrance_col])
