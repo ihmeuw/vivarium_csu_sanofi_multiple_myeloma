@@ -77,7 +77,9 @@ class DiseaseStateHazard(DiseaseState):
 
     def add_transition(self, output, source_data_type=None, get_data_functions=None, **kwargs):
         if source_data_type == 'hazard_rate':
-            return RateTransition(self, output)
+            t = HazardRateTransition(self, output)
+            self.transition_set.append(t)
+            return t
         else:
             return super().add_transition(output, source_data_type, get_data_functions, **kwargs)
 
