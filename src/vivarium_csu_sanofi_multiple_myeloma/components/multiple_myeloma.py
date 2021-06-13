@@ -144,4 +144,9 @@ def load_hazard_rate(builder: 'Builder', state_id, measure):
     # FIXME: Hack for draw-level hazard rate
     hazard_rate_data = hazard_rate_data[
         [f'{state_id}_time_since_entrance_start', f'{state_id}_time_since_entrance_end', 'rate']]
+
+    hazard_rate_data['sex'] = 'Female'
+    hazard_rate_data_male = hazard_rate_data.copy()
+    hazard_rate_data_male['sex'] = 'Male'
+    hazard_rate_data = pd.concat([hazard_rate_data, hazard_rate_data_male])
     return hazard_rate_data
