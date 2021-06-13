@@ -1,6 +1,10 @@
 from typing import List, Tuple, TYPE_CHECKING
 
 import pandas as pd
+from vivarium.framework.values import (
+    list_combiner,
+    union_post_processor,
+)
 from vivarium_public_health.disease import (
     DiseaseState,
     DiseaseModel,
@@ -22,11 +26,27 @@ if TYPE_CHECKING:
 
 class HazardRateTransition(RateTransition):
 
+    # noinspection PyAttributeOutsideInit
     def setup(self, builder: 'Builder') -> None:
-        super().setup(builder)
-        rate_data, _ = self.load_transition_rate_data(builder)
+        rate_data, pipeline_name = self.load_transition_rate_data(builder)
         self.base_rate = builder.lookup.build_table(
-            rate_data, parameter_columns=[self.input_state.time_since_entrance_col])
+            rate_data,
+            parameter_columns=[self.input_state.time_since_entrance_col],
+        )
+        self.transition_rate = builder.value.register_rate_producer(
+            pipeline_name,
+            source=self.compute_transition_rate,
+            requires_columns=['age', 'sex', 'alive'],
+            requires_values=[f'{pipeline_name}.paf'],
+        )
+        paf = builder.lookup.build_table(0)
+        self.joint_paf = builder.value.register_value_producer(
+            f'{pipeline_name}.paf',
+            source=lambda index: [paf(index)],
+            preferred_combiner=list_combiner,
+            preferred_post_processor=union_post_processor,
+        )
+        self.population_view = builder.population.get_view(['alive'])
 
     def load_transition_rate_data(self, builder: 'Builder') -> Tuple[pd.DataFrame, str]:
         rate_data = load_hazard_rate(builder, self.input_state.state_id, "incidence")
@@ -144,4 +164,5 @@ def load_hazard_rate(builder: 'Builder', state_id, measure):
     # FIXME: Hack for draw-level hazard rate
     hazard_rate_data = hazard_rate_data[
         [f'{state_id}_time_since_entrance_start', f'{state_id}_time_since_entrance_end', 'rate']]
+
     return hazard_rate_data
