@@ -51,14 +51,24 @@ def make_treatment_coverage(year, scenario):
     return coverage.reset_index()
 
 
-class MMTreatment:
+class MMTreatmentCoverage:
 
     configuration_defaults = {
         'mm_treatment_scenario': SCENARIOS.baseline,
     }
 
     def setup(self, builder: 'Builder') -> None:
+        scenario = builder.configuration.mm_treatment_scenario
+        assert scenario in SCENARIOS
 
+        self.clock = builder.time.clock()
+
+        coverage_2021 = make_treatment_coverage(2021, scenario)
+        coverage_2025 = make_treatment_coverage(2021, scenario)
+
+        columns_created = ['mm_treatment', ]
+
+    def get_treatment_coverage(self, index) -> pd.DataFrame:
 
 
 
