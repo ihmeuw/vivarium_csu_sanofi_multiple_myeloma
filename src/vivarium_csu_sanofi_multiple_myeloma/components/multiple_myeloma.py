@@ -1,28 +1,34 @@
-from datetime import timedelta
+from typing import List, Tuple, TYPE_CHECKING
+
 import pandas as pd
-from typing import Union
-import typing
+from vivarium_public_health.disease import (
+    DiseaseState,
+    DiseaseModel,
+    SusceptibleState,
+    RateTransition,
+)
 
-from vivarium_public_health.disease import (DiseaseState, DiseaseModel, SusceptibleState,
-                                            RateTransition as RateTransition_, RecoveredState)
+from vivarium_csu_sanofi_multiple_myeloma import paths
+from vivarium_csu_sanofi_multiple_myeloma.constants import (
+    models,
+    data_keys,
+)
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import models, data_keys, data_values
-import vivarium_csu_sanofi_multiple_myeloma.paths as paths
-
-
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from vivarium.framework.engine import Builder
     from vivarium.framework.event import Event
+    from vivarium.framework.population import SimulantData
 
 
-class RateTransition(RateTransition_):
-    def setup(self, builder):
+class HazardRateTransition(RateTransition):
+
+    def setup(self, builder: 'Builder') -> None:
         super().setup(builder)
         rate_data, _ = self.load_transition_rate_data(builder)
         self.base_rate = builder.lookup.build_table(
             rate_data, parameter_columns=[self.input_state.time_since_entrance_col])
 
-    def load_transition_rate_data(self, builder):
+    def load_transition_rate_data(self, builder: 'Builder') -> Tuple[pd.DataFrame, str]:
         rate_data = load_hazard_rate(builder, self.input_state.state_id, "incidence")
         pipeline_name = f'{self.input_state.state_id}_to_{self.output_state.state_id}.transition_rate'
         return rate_data, pipeline_name
@@ -34,10 +40,10 @@ class DiseaseStateHazard(DiseaseState):
         self.time_since_entrance_col = f'{self.state_id}_time_since_entrance'
 
     @property
-    def columns_created(self):
+    def columns_created(self) -> List[str]:
         return super().columns_created + [self.time_since_entrance_col]
 
-    def setup(self, builder: 'Builder'):
+    def setup(self, builder: 'Builder') -> None:
         super().setup(builder)
         builder.event.register_listener('time_step', self.on_time_step)
 
@@ -46,7 +52,7 @@ class DiseaseStateHazard(DiseaseState):
         self.hazard_rate = builder.lookup.build_table(
             hazard_rate_data, parameter_columns=[self.time_since_entrance_col])
 
-    def on_initialize_simulants(self, pop_data):
+    def on_initialize_simulants(self, pop_data: 'SimulantData') -> None:
         super().on_initialize_simulants(pop_data)
         entrance_time = self.population_view.subview([self.event_time_column]).get(pop_data.index)
         time_since_entrance = pd.Series(
@@ -55,7 +61,7 @@ class DiseaseStateHazard(DiseaseState):
             name=self.time_since_entrance_col)
         self.population_view.update(time_since_entrance)
 
-    def on_time_step(self, event: 'Event'):
+    def on_time_step(self, event: 'Event') -> None:
         entrance_time = self.population_view.subview([self.event_time_column]).get(event.index)
         time_since_entrance = pd.Series(
             data=(event.time-entrance_time.iloc[:, 0]).dt.days,
@@ -63,7 +69,7 @@ class DiseaseStateHazard(DiseaseState):
             name=self.time_since_entrance_col)
         self.population_view.update(time_since_entrance)
 
-    def compute_excess_mortality_rate(self, index):
+    def compute_excess_mortality_rate(self, index: pd.Index) -> pd.Series:
         excess_mortality_rate = pd.Series(0, index=index)
         with_condition = self.with_condition(index)
         excess_mortality_rate.loc[with_condition] = self.hazard_rate(with_condition)
@@ -78,12 +84,11 @@ class DiseaseStateHazard(DiseaseState):
 
 def MultipleMyeloma():
     susceptible = SusceptibleState(models.MULTIPLE_MYELOMA_MODEL_NAME)
-    mm_1 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_1_STATE_NAME
-    )
-
-    # Add transitions for Susceptible state
     susceptible.allow_self_transitions()
+
+    mm_1 = DiseaseStateHazard(models.MULTIPLE_MYELOMA_1_STATE_NAME)
+    mm_1.allow_self_transitions()
+
     susceptible.add_transition(
         mm_1,
         source_data_type='rate',
@@ -92,45 +97,24 @@ def MultipleMyeloma():
         }
     )
 
-    mm_2 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_2_STATE_NAME
-    )
-    mm_1.allow_self_transitions()
-    mm_1.add_transition(
-        mm_2,
-        source_data_type="hazard_rate"
-    )
+    states = [susceptible, mm_1]
 
-    mm_3 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_3_STATE_NAME
-    )
-    mm_2.allow_self_transitions()
-    mm_2.add_transition(
-        mm_3,
-        source_data_type="hazard_rate"
-    )
+    rr_mm_states = [
+        models.MULTIPLE_MYELOMA_2_STATE_NAME,
+        models.MULTIPLE_MYELOMA_3_STATE_NAME,
+        models.MULTIPLE_MYELOMA_4_STATE_NAME,
+        models.MULTIPLE_MYELOMA_5_STATE_NAME,
+    ]
+    for state_name in rr_mm_states:
+        rr_mm_state = DiseaseStateHazard(state_name)
+        rr_mm_state.allow_self_transitions()
+        states[-1].add_transition(
+            rr_mm_state,
+            source_data_type="hazard_rate",
+        )
+        states.append(rr_mm_state)
 
-    mm_4 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_4_STATE_NAME
-    )
-    mm_3.allow_self_transitions()
-    mm_3.add_transition(
-        mm_4,
-        source_data_type="hazard_rate"
-    )
-
-    mm_5 = DiseaseStateHazard(
-        models.MULTIPLE_MYELOMA_5_STATE_NAME
-    )
-    mm_4.allow_self_transitions()
-    mm_4.add_transition(
-        mm_5,
-        source_data_type="hazard_rate"
-    )
-
-    mm_5.allow_self_transitions()
-
-    return DiseaseModel('multiple_myeloma', states=[susceptible, mm_1, mm_2, mm_3, mm_4, mm_5])
+    return DiseaseModel(models.MULTIPLE_MYELOMA_MODEL_NAME, states=states)
 
 
 def load_hazard_rate(builder: 'Builder', state_id, measure):

@@ -62,10 +62,6 @@ class __MultipleMyeloma(NamedTuple):
     LINE_5_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_5.disability_weight')
     LINE_5_EMR: TargetString = TargetString('cause.multiple_myeloma_5.excess_mortality_rate')
 
-    # Useful keys not for the artifact - distinguished by not using the colon type declaration
-    # RAW_DISEASE_PREVALENCE = TargetString('sequela.raw_disease.prevalence')
-    # RAW_DISEASE_INCIDENCE_RATE = TargetString('sequela.raw_disease.incidence_rate')
-
     @property
     def name(self):
         return 'multiple_myeloma'
