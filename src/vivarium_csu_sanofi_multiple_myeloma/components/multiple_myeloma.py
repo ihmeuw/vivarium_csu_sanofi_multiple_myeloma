@@ -50,7 +50,7 @@ class DiseaseStateHazard(DiseaseState):
         hazard_rate_data = load_hazard_rate(builder, self.state_id, "mortality")
         # noinspection PyAttributeOutsideInit
         self.hazard_rate = builder.lookup.build_table(
-            hazard_rate_data, parameter_columns=[self.time_since_entrance_col])
+            hazard_rate_data, key_columns=['sex'], parameter_columns=[self.time_since_entrance_col])
 
     def on_initialize_simulants(self, pop_data: 'SimulantData') -> None:
         super().on_initialize_simulants(pop_data)
