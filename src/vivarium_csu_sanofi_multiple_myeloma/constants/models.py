@@ -42,3 +42,4 @@ STATE_MACHINE_MAP = {
 
 STATES = tuple(state for model in STATE_MACHINE_MAP.values() for state in model['states'])
 TRANSITIONS = tuple(state for model in STATE_MACHINE_MAP.values() for state in model['transitions'])
+
