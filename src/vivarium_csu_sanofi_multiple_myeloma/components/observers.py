@@ -27,14 +27,14 @@ class MultipleMyelomaTreatmentObserver:
         builder.event.register_listener('collect_metrics', self.on_collect_metrics)
 
     def on_collect_metrics(self, event: 'Event') -> None:
-        treatment_template = 'line_{treatment_line}_treatment_{treatment}'
+        treatment_template = 'line_{treatment_line}_treatment_{treatment}_year_{year}'
         pop = self.population_view.get(event.index)
         counts = {}
         for s in models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES:
             treatment_line = s.split('_')[-1]
             had_mm_event = pop[f'{s}_event_time'] == event.time
             for t in TREATMENTS:
-                key = treatment_template.format(treatment_line=treatment_line, treatment=t)
+                key = treatment_template.format(treatment_line=treatment_line, treatment=t, year=event.time.year)
                 got_treatment = pop['multiple_myeloma_treatment'] == t
                 counts[key] = (had_mm_event & got_treatment).sum()
         self.counts.update(counts)
