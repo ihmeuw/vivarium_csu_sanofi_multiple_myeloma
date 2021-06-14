@@ -71,9 +71,11 @@ class MultipleMyelomaTreatmentCoverage:
         self.treatment_column = 'multiple_myeloma_treatment'
         # Did they previously recieve isatuxamib or daratumumab
         self.retreatment_eligible_column = 'retreatment_eligible'
+        self.retreated_column = 'retreated'
         columns_created = [
             self.treatment_column,
             self.retreatment_eligible_column,
+            self.retreated_column
         ]
         columns_required = (
             [models.MULTIPLE_MYELOMA_MODEL_NAME]
@@ -95,6 +97,7 @@ class MultipleMyelomaTreatmentCoverage:
         pop_update = pd.DataFrame({
             self.treatment_column: models.TREATMENTS.no_treatment,
             self.retreatment_eligible_column: 'unknown',
+            self.retreated_column: False
         }, index=pop_data.index)
         with_mm = initial_mm_state.loc[
             initial_mm_state[models.MULTIPLE_MYELOMA_MODEL_NAME] != models.SUSCEPTIBLE_STATE_NAME,
@@ -128,7 +131,7 @@ class MultipleMyelomaTreatmentCoverage:
 
         coverage = self.get_current_coverage(event.time)
         for current_line, previous_line in zip(TREATMENT_LINES, [None] + TREATMENT_LINES[:-1]):
-
+            # First, unpack probabilities for the current and previous line.
             p_isa_c = coverage.at[current_line, models.TREATMENTS.isatuxamib]
             p_dara_c = coverage.at[current_line, models.TREATMENTS.daratumamab]
             p_resid_c = coverage.at[current_line, models.TREATMENTS.residual]
@@ -139,26 +142,36 @@ class MultipleMyelomaTreatmentCoverage:
             else:
                 p_isa_p, p_dara_p, p_resid_p = 0., 0., 1.
 
+            # Our base filter, which we'll partition.
             new_treatment_line = pop[f'{current_line}_event_time'] == event.time
 
+            # First group, getting their 2nd+ round of isa/dara
             retreat = new_treatment_line & retreatment_eligible & retreat_mask
             retreat_choices = [models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab]
             retreat_probs = [p_isa_c / (p_isa_c + p_dara_c), p_dara_c / (p_isa_c + p_dara_c)]
+
             pop.loc[retreat, self.treatment_column] = self.randomness.choice(
                 pop.loc[retreat].index,
                 choices=retreat_choices,
                 p=retreat_probs,
             )
+            pop.loc[retreat, self.retreatment_eligible_column] = 'true'  # This is a no-op.  Here for clarity.
+            pop.loc[retreat, self.retreated_column] = True
 
+            # Second group, got 1 dose of isa/dara, but can't receive again.
             no_retreat = (
                 (new_treatment_line & retreatment_eligible & ~retreat_mask)
                 | (new_treatment_line & retreatment_ineligible)
             )
+
             pop.loc[no_retreat, self.treatment_column] = models.TREATMENTS.residual
             pop.loc[no_retreat, self.retreatment_eligible_column] = 'false'
+            pop.loc[no_retreat, self.retreated_column] = False  # This is a no-op.  Here for clarity.
 
+            # Third group, getting their first dose of isa/dara and determining if they can be retreated.
             unknown_retreat = new_treatment_line & retreatment_unknown
             unknown_choices = [models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab, models.TREATMENTS.residual]
+            # TODO: add a link to the docs when they're live for this algorithm.
             old_to_new_scale = (p_isa_p + p_dara_p) / (p_isa_c + p_dara_c)
             final_scale = (1 - PROBABILITY_RETREAT * old_to_new_scale) / p_resid_p
             p_isa = p_isa_c * final_scale
@@ -167,6 +180,7 @@ class MultipleMyelomaTreatmentCoverage:
                 p_isa, p_dara = p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)
             p_resid = 1 - p_isa - p_dara
             unknown_treatment_probs = [p_isa, p_dara, p_resid]
+
             pop.loc[unknown_retreat, self.treatment_column] = self.randomness.choice(
                 pop.loc[unknown_retreat].index,
                 choices=unknown_choices,
@@ -176,7 +190,9 @@ class MultipleMyelomaTreatmentCoverage:
                 models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab
             ])
             pop.loc[unknown_retreat & isa_or_dara, self.retreatment_eligible_column] = 'true'
-            pop.loc[unknown_retreat & ~isa_or_dara, self.retreatment_eligible_column] = 'false'
+            # These are no-ops.  Here for clarity.
+            pop.loc[unknown_retreat & ~isa_or_dara, self.retreatment_eligible_column] = 'unknown'
+            pop.loc[unknown_retreat, self.retreated_column] = False
 
         self.population_view.update(pop)
 
