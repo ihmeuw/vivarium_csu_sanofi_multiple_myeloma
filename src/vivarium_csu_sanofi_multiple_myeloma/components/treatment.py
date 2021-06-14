@@ -103,6 +103,11 @@ def make_mortality_hazard_ratio():
         hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = later_line_dara_retreat
         hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = later_line_residual
         hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = later_line_residual
+
+    hazard_ratio = hazard_ratio.reset_index()
+    # FIXME: Super-duper hack to make lookup table work.  Need at least one continuous parameter.
+    hazard_ratio['year_start'] = 1990
+    hazard_ratio['year_end'] = 2100
     return hazard_ratio
 
 
