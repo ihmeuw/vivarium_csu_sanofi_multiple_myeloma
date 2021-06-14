@@ -1,4 +1,4 @@
- from typing import NamedTuple, TYPE_CHECKING
+from typing import NamedTuple, TYPE_CHECKING
 
 import pandas as pd
 
