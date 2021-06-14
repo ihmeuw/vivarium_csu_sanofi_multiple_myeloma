@@ -127,7 +127,8 @@ class MultipleMyelomaTreatmentCoverage:
         retreatment_ineligible = pop[self.retreatment_eligible_column] == 'false'
 
         coverage = self.get_current_coverage(event.time)
-        for current_line, previous_line in zip(TREATMENT_LINES, [None] + TREATMENT_LINES[:-1]):
+        lines = TREATMENT_LINES.tolist()
+        for current_line, previous_line in zip(lines, [None] + lines[:-1]):
             # First, unpack probabilities for the current and previous line.
             p_isa_c = coverage.at[current_line, models.TREATMENTS.isatuxamib]
             p_dara_c = coverage.at[current_line, models.TREATMENTS.daratumamab]
@@ -183,7 +184,7 @@ class MultipleMyelomaTreatmentCoverage:
                 choices=unknown_choices,
                 p=unknown_treatment_probs,
             )
-            isa_or_dara = pop.loc[self.treatment_column].isin([
+            isa_or_dara = pop[self.treatment_column].isin([
                 models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab
             ])
             pop.loc[unknown_retreat & isa_or_dara, self.retreatment_eligible_column] = 'true'
