@@ -111,7 +111,9 @@ class MultipleMyelomaTreatmentCoverage:
             additional_key='initial_treatment_status',
         )
         pop_update.loc[with_mm.index, self.treatment_column] = treatment
-        dara_or_isa = pop_update[self.treatment_column].isin([TREATMENTS.daratumamab, TREATMENTS.isatuxamib])
+        dara_or_isa = pop_update[self.treatment_column].isin(
+            [models.TREATMENTS.daratumamab, models.TREATMENTS.isatuxamib]
+        )
         pop_update.loc[dara_or_isa, self.previous_isa_or_dara_column] = True
         self.population_view.update(pop_update)
 
