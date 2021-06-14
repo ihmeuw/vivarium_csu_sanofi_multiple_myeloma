@@ -3,7 +3,6 @@ from typing import Dict, TYPE_CHECKING
 
 import pandas as pd
 
-from vivarium_csu_sanofi_multiple_myeloma.components.treatment import TREATMENTS
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 
 if TYPE_CHECKING:
@@ -33,7 +32,7 @@ class MultipleMyelomaTreatmentObserver:
         for s in models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES:
             treatment_line = s.split('_')[-1]
             had_mm_event = pop[f'{s}_event_time'] == event.time
-            for t in TREATMENTS:
+            for t in models.TREATMENTS:
                 key = treatment_template.format(treatment_line=treatment_line, treatment=t, year=event.time.year)
                 got_treatment = pop['multiple_myeloma_treatment'] == t
                 counts[key] = (had_mm_event & got_treatment).sum()

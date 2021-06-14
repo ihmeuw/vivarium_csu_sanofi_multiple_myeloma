@@ -10,9 +10,6 @@ if TYPE_CHECKING:
     from vivarium.framework.event import Event
     from vivarium.framework.population import SimulantData
 
-
-
-
 TREATMENT_LINES = pd.Index(
     list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES),
     name=models.MULTIPLE_MYELOMA_MODEL_NAME
