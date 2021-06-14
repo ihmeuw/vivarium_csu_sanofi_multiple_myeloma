@@ -1,4 +1,4 @@
-from typing import NamedTuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
@@ -11,14 +11,7 @@ if TYPE_CHECKING:
     from vivarium.framework.population import SimulantData
 
 
-class __Treatments(NamedTuple):
-    no_treatment: str
-    isatuxamib: str
-    daratumamab: str
-    residual: str
 
-
-TREATMENTS = __Treatments(*__Treatments._fields)
 
 TREATMENT_LINES = pd.Index(
     list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES),
@@ -44,10 +37,10 @@ def make_treatment_coverage(year, scenario):
 
     coverage_data = coverages[(year, scenario)]
     coverage = pd.DataFrame({
-        TREATMENTS.isatuxamib: coverage_data[0],
-        TREATMENTS.daratumamab: coverage_data[1],
+        models.TREATMENTS.isatuxamib: coverage_data[0],
+        models.TREATMENTS.daratumamab: coverage_data[1],
     }, index=TREATMENT_LINES)
-    coverage[TREATMENTS.residual] = 1 - coverage.sum(axis=1)
+    coverage[models.TREATMENTS.residual] = 1 - coverage.sum(axis=1)
     return coverage
 
 PROBABILITY_RETREAT = 0.15
@@ -99,7 +92,7 @@ class MultipleMyelomaTreatmentCoverage:
         current_coverage = self.get_current_coverage(pop_data.creation_time)
         initial_mm_state = self.population_view.subview([models.MULTIPLE_MYELOMA_MODEL_NAME]).get(pop_data.index)
         pop_update = pd.DataFrame({
-            self.treatment_column: TREATMENTS.no_treatment,
+            self.treatment_column: models.TREATMENTS.no_treatment,
             self.previous_isa_or_dara_column: False,
         }, index=pop_data.index)
         with_mm = initial_mm_state.loc[
@@ -133,11 +126,13 @@ class MultipleMyelomaTreatmentCoverage:
             pop.loc[new_treatment_line & previous_isa_or_dara & retreat, self.treatment_column] = (
                 self.randomness.choice(
                     pop.loc[new_treatment_line & previous_isa_or_dara & retreat].index,
-                    choices=[TREATMENTS.isatuxamib, TREATMENTS.daratumamab],
-                    p=line_coverage.loc[[TREATMENTS.isatuxamib, TREATMENTS.daratumamab]],
+                    choices=[models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab],
+                    p=line_coverage.loc[[models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab]],
                 )
             )
-            pop.loc[new_treatment_line & previous_isa_or_dara & ~retreat, self.treatment_column] = TREATMENTS.residual
+            pop.loc[new_treatment_line & previous_isa_or_dara & ~retreat, self.treatment_column] = (
+                models.TREATMENTS.residual
+            )
             pop.loc[new_treatment_line & ~previous_isa_or_dara, self.treatment_column] = (
                 self.randomness.choice(
                     pop.loc[new_treatment_line & ~previous_isa_or_dara].index,
@@ -156,8 +151,8 @@ class MultipleMyelomaTreatmentCoverage:
             return self.coverage_2025
         t = (time - pd.Timestamp('2021-01-01')) / (pd.Timestamp('2026-01-01') - pd.Timestamp('2021-01-01'))
 
-        treatments = [TREATMENTS.isatuxamib, TREATMENTS.daratumamab]
+        treatments = [models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab]
         slope = self.coverage_2025[treatments] - self.coverage_2021[treatments]
         coverage = self.coverage_2021[treatments] + slope * t
-        coverage[TREATMENTS.residual] = 1 - coverage.sum(axis=1)
+        coverage[models.TREATMENTS.residual] = 1 - coverage.sum(axis=1)
         return coverage

@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 from vivarium_csu_sanofi_multiple_myeloma.constants import data_keys
 
 
@@ -48,3 +50,11 @@ STATE_MACHINE_MAP = {
 STATES = tuple(state for model in STATE_MACHINE_MAP.values() for state in model['states'])
 TRANSITIONS = tuple(state for model in STATE_MACHINE_MAP.values() for state in model['transitions'])
 
+class __Treatments(NamedTuple):
+    no_treatment: str
+    isatuxamib: str
+    daratumamab: str
+    residual: str
+
+
+TREATMENTS = __Treatments(*__Treatments._fields)
