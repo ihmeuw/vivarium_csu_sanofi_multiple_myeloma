@@ -69,6 +69,11 @@ def make_progression_hazard_ratio():
         hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = later_line_dara_retreat
         hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = later_line_residual
         hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = later_line_residual
+
+    hazard_ratio = hazard_ratio.reset_index()
+    # FIXME: Super-duper hack to make lookup table work.  Need at least one continuous parameter.
+    hazard_ratio['year_start'] = 1990
+    hazard_ratio['year_end'] = 2100
     return hazard_ratio
 
 def make_mortality_hazard_ratio():
@@ -282,11 +287,13 @@ class MultipleMyelomaTreatmentEffect:
         self.progression_hazard_ratio = builder.lookup.build_table(
             progression_hazard_ratio,
             key_columns=required_columns,
+            parameter_columns=['year']
         )
         mortality_hazard_ratio = make_mortality_hazard_ratio()
         self.mortality_hazard_ratio = builder.lookup.build_table(
             mortality_hazard_ratio,
             key_columns=required_columns,
+            parameter_columns=['year']
         )
         states = list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES)
         for state, next_state in zip(states, states[1:] + [None]):
