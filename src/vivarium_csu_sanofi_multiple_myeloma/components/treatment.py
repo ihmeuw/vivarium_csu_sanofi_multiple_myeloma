@@ -54,8 +54,8 @@ def make_progression_hazard_ratio():
     later_line_dara_retreat = 0.609  # lower = 0.601, upper = 0.616
     later_line_residual = 1.331  # lower = 1.324, upper = 1.337
 
-    idx = pd.MultiIndex(names=[models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated'])
-    hazard_ratio = pd.DataFrame(columns='hazard_ratio', index=idx)
+    index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
+    hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
 
     line = models.MULTIPLE_MYELOMA_1_STATE_NAME
     hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = first_line_isa
@@ -83,8 +83,8 @@ def make_mortality_hazard_ratio():
     later_line_dara_retreat = 0.786  # lower = 0.776, upper = 0.797
     later_line_residual = 1.181  # lower = 1.171, upper = 1.190
 
-    idx = pd.MultiIndex(names=[models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated'])
-    hazard_ratio = pd.DataFrame(columns='hazard_ratio', index=idx)
+    index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
+    hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
 
     line = models.MULTIPLE_MYELOMA_1_STATE_NAME
     hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = first_line_isa
