@@ -1,4 +1,4 @@
-from typing import NamedTuple, TYPE_CHECKING
+ from typing import NamedTuple, TYPE_CHECKING
 
 import pandas as pd
 
@@ -7,6 +7,7 @@ from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS
 
 if TYPE_CHECKING:
     from vivarium.framework.engine import Builder
+    from vivarium.framework.event import Event
     from vivarium.framework.population import SimulantData
 
 
@@ -19,13 +20,10 @@ class __Treatments(NamedTuple):
 
 TREATMENTS = __Treatments(*__Treatments._fields)
 
-TREATMENT_LINES = pd.Index([
-    models.MULTIPLE_MYELOMA_1_STATE_NAME,
-    models.MULTIPLE_MYELOMA_2_STATE_NAME,
-    models.MULTIPLE_MYELOMA_3_STATE_NAME,
-    models.MULTIPLE_MYELOMA_4_STATE_NAME,
-    models.MULTIPLE_MYELOMA_5_STATE_NAME,
-], name=models.MULTIPLE_MYELOMA_MODEL_NAME)
+TREATMENT_LINES = pd.Index(
+    list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES),
+    name=models.MULTIPLE_MYELOMA_MODEL_NAME
+)
 
 def make_treatment_coverage(year, scenario):
     coverages = {
@@ -51,6 +49,8 @@ def make_treatment_coverage(year, scenario):
     }, index=TREATMENT_LINES)
     coverage[TREATMENTS.residual] = 1 - coverage.sum(axis=1)
     return coverage
+
+PROBABILITY_RETREAT = 0.15
 
 
 class MultipleMyelomaTreatmentCoverage:
@@ -81,14 +81,19 @@ class MultipleMyelomaTreatmentCoverage:
             self.treatment_column,
             self.previous_isa_or_dara_column,
         ]
-        columns_required = [models.MULTIPLE_MYELOMA_MODEL_NAME]
-
+        columns_required = (
+            [models.MULTIPLE_MYELOMA_MODEL_NAME]
+            + [f'{s}_event_time' for s in models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES]
+        )
         self.population_view = builder.population.get_view(columns_required + columns_created)
         builder.population.initializes_simulants(
             self.on_initialize_simulants,
             creates_columns=columns_created,
             requires_columns=columns_required,
+            requires_streams=[self.randomness.key],
         )
+
+        builder.event.register_listener('time_step__cleanup', self.on_time_step_cleanup)
 
     def on_initialize_simulants(self, pop_data: 'SimulantData') -> None:
         current_coverage = self.get_current_coverage(pop_data.creation_time)
@@ -109,11 +114,37 @@ class MultipleMyelomaTreatmentCoverage:
             with_mm.index,
             choices=current_coverage.columns.tolist(),
             p=current_coverage.values,
+            additional_key='initial_treatment_status',
         )
         pop_update.loc[with_mm, self.treatment_column] = treatment
         dara_or_isa = pop_update[self.treatment_column].isin([TREATMENTS.daratumamab, TREATMENTS.isatuxamib])
         pop_update.loc[dara_or_isa, self.previous_isa_or_dara_column] = True
         self.population_view.update(pop_update)
+
+    def on_time_step_cleanup(self, event: 'Event'):
+        pop = self.population_view.get(event.index)
+        retreat = self.randomness.get_draw(pop.index, additional_key='retreat') < PROBABILITY_RETREAT
+        previous_isa_or_dara = pop[self.previous_isa_or_dara_column]
+        coverage = self.get_current_coverage(event.time)
+        for s in models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES:
+            line_coverage = coverage.loc[s]
+            new_treatment_line = pop[f'{s}_event_time'] == event.time
+            pop.loc[new_treatment_line & previous_isa_or_dara & retreat, self.treatment_column] = (
+                self.randomness.choice(
+                    pop.loc[new_treatment_line & previous_isa_or_dara & retreat].index,
+                    choices=[TREATMENTS.isatuxamib, TREATMENTS.daratumamab],
+                    p=line_coverage.loc[[TREATMENTS.isatuxamib, TREATMENTS.daratumamab]],
+                )
+            )
+            pop.loc[new_treatment_line & previous_isa_or_dara & ~retreat, self.treatment_column] = TREATMENTS.residual
+            pop.loc[new_treatment_line & ~previous_isa_or_dara, self.treatment_column] = (
+                self.randomness.choice(
+                    pop.loc[new_treatment_line & ~previous_isa_or_dara].index,
+                    choices=coverage.columns.tolist(),
+                    p=line_coverage,
+                )
+            )
+        self.population_view.update(pop)
 
     def get_current_coverage(self, time: pd.Timestamp) -> pd.DataFrame:
         """Get a df with columns: [TREATMENTS.isatuxamib, TREATMENTS.daratumamab, TREATMENTS.residual]
