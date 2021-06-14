@@ -102,8 +102,9 @@ class MultipleMyelomaTreatmentCoverage:
             self.treatment_column: TREATMENTS.no_treatment,
             self.previous_isa_or_dara_column: False,
         }, index=pop_data.index)
-        with_mm = initial_mm_state[
-            initial_mm_state[models.MULTIPLE_MYELOMA_MODEL_NAME] != models.SUSCEPTIBLE_STATE_NAME
+        with_mm = initial_mm_state.loc[
+            initial_mm_state[models.MULTIPLE_MYELOMA_MODEL_NAME] != models.SUSCEPTIBLE_STATE_NAME,
+            models.MULTIPLE_MYELOMA_MODEL_NAME
         ]
         current_coverage = pd.DataFrame(
             current_coverage.loc[with_mm.values].values,
@@ -116,7 +117,7 @@ class MultipleMyelomaTreatmentCoverage:
             p=current_coverage.values,
             additional_key='initial_treatment_status',
         )
-        pop_update.loc[with_mm, self.treatment_column] = treatment
+        pop_update.loc[with_mm.index, self.treatment_column] = treatment
         dara_or_isa = pop_update[self.treatment_column].isin([TREATMENTS.daratumamab, TREATMENTS.isatuxamib])
         pop_update.loc[dara_or_isa, self.previous_isa_or_dara_column] = True
         self.population_view.update(pop_update)
