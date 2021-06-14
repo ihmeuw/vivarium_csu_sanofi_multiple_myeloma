@@ -136,7 +136,7 @@ class MultipleMyelomaTreatmentCoverage:
         scenario = builder.configuration.mm_treatment_scenario
         assert scenario in SCENARIOS
         self.coverage_2021 = make_treatment_coverage(2021, scenario)
-        self.coverage_2025 = make_treatment_coverage(2021, scenario)
+        self.coverage_2025 = make_treatment_coverage(2025, scenario)
 
         # What treatment are they currently on.
         self.treatment_column = 'multiple_myeloma_treatment'
