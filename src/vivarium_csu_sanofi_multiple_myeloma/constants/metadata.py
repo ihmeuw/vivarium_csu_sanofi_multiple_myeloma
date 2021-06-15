@@ -19,8 +19,8 @@ LOCATIONS = [
 
 
 class __Scenarios(NamedTuple):
-    baseline: str = 'baseline'
-    # TODO - add scenarios here
+    baseline: str
+    alternative: str
 
 
-SCENARIOS = __Scenarios()
+SCENARIOS = __Scenarios(*__Scenarios._fields)

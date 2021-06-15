@@ -32,6 +32,7 @@ def make_measure_data(data):
         deaths=get_by_cause_measure_data(data, 'deaths'),
         state_person_time=get_state_person_time_measure_data(data, 'state_person_time'),
         transition_count=get_transition_count_measure_data(data, 'transition_count'),
+        treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
     )
     return measure_data
 
@@ -44,6 +45,7 @@ class MeasureData(NamedTuple):
     deaths: pd.DataFrame
     state_person_time: pd.DataFrame
     transition_count: pd.DataFrame
+    treatment_count: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
@@ -159,4 +161,11 @@ def get_transition_count_measure_data(data, measure):
     # Oops, edge case.
     data = data.drop(columns=[c for c in data.columns if 'event_count' in c and '2041' in c])
     data = get_measure_data(data, measure)
+    return sort_data(data)
+
+def get_treatment_count_measure_data(data, measure):
+    data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
+    data['treatment_line'], data['process'] = data.process.str.split('_treatment_').str
+    data['treatment'], data['year'] = data.process.str.split('_year_').str
+    data = data.drop(columns='process')
     return sort_data(data)
