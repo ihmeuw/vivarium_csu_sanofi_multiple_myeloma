@@ -12,6 +12,7 @@ components:
     vivarium_csu_sanofi_multiple_myeloma.components:
         - MultipleMyeloma()
         - MultipleMyelomaTreatmentCoverage()
+        - MultipleMyelomaTreatmentEffect()
         - MultipleMyelomaTreatmentObserver()
 
 configuration:
@@ -32,10 +33,10 @@ configuration:
             month: 1
             day: 1
         end:
-            year: 2023
+            year: 2026
             month: 12
             day: 31
-        step_size: 180 # Days
+        step_size: 28 # Days
     population:
         population_size: 100000
         age_start: 15
