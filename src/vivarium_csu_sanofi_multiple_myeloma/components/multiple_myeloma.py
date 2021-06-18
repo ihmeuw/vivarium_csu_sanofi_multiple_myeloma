@@ -65,7 +65,11 @@ class DiseaseStateHazard(DiseaseState):
 
     def setup(self, builder: 'Builder') -> None:
         super().setup(builder)
-        builder.event.register_listener('time_step', self.on_time_step)
+        builder.event.register_listener(
+            'time_step',
+            self.on_time_step,
+            priority=6,  # Ugh, bad hack. Need this to occur after DiseaseModel.on_time_step.
+        )
 
         hazard_rate_data = load_hazard_rate(builder, self.state_id, "mortality")
         # noinspection PyAttributeOutsideInit
@@ -121,12 +125,8 @@ def MultipleMyeloma():
 
     states = [susceptible, mm_1]
 
-    rr_mm_states = [
-        models.MULTIPLE_MYELOMA_2_STATE_NAME,
-        models.MULTIPLE_MYELOMA_3_STATE_NAME,
-        models.MULTIPLE_MYELOMA_4_STATE_NAME,
-        models.MULTIPLE_MYELOMA_5_STATE_NAME,
-    ]
+    rr_mm_states = list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES[1:])
+
     for state_name in rr_mm_states:
         rr_mm_state = DiseaseStateHazard(state_name)
         rr_mm_state.allow_self_transitions()

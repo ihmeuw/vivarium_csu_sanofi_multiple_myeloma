@@ -11,6 +11,10 @@ components:
     # Causes an error if left empty. Uncomment when you have components. 
     vivarium_csu_sanofi_multiple_myeloma.components:
         - MultipleMyeloma()
+        - MultipleMyelomaTreatmentCoverage()
+        - MultipleMyelomaTreatmentEffect()
+        - MultipleMyelomaTreatmentObserver()
+
 
 configuration:
     input_data:
@@ -30,10 +34,10 @@ configuration:
             month: 1
             day: 1
         end:
-            year: 2026
+            year: 2023
             month: 12
             day: 31
-        step_size: 28 # Days
+        step_size: 180 # Days
     population:
         population_size: 100000
         age_start: 15
@@ -52,3 +56,5 @@ configuration:
             by_age: True
             by_sex: True
             by_year: True
+    mm_treatment_scenario: 'baseline'
+
