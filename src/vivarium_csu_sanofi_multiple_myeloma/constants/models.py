@@ -52,8 +52,9 @@ STATE_MACHINE_MAP = {
 STATES = tuple(state for model in STATE_MACHINE_MAP.values() for state in model['states'])
 TRANSITIONS = tuple(state for model in STATE_MACHINE_MAP.values() for state in model['transitions'])
 
+
 class __Treatments(NamedTuple):
-    no_treatment: str
+    not_treated: str
     isatuxamib: str
     daratumamab: str
     residual: str

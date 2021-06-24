@@ -57,7 +57,7 @@ def make_progression_hazard_ratio():
     index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
     hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
 
-    hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.no_treatment, False)] = 1.0
+    hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
     line = models.MULTIPLE_MYELOMA_1_STATE_NAME
     hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = first_line_isa
@@ -77,6 +77,7 @@ def make_progression_hazard_ratio():
     hazard_ratio['year_start'] = 1990
     hazard_ratio['year_end'] = 2100
     return hazard_ratio
+
 
 def make_mortality_hazard_ratio():
     # TODO: Get a distribution from researchers and sample.
@@ -84,8 +85,8 @@ def make_mortality_hazard_ratio():
     first_line_dara = 0.760  # lower = 0.645, upper = 0.895
     first_line_residual = 1.0024  # lower = 1.0011, upper = 1.0036
 
-    later_line_isa = 1.159  # lower = 1.044, upper = 1.185
-    later_line_isa_retreat = 1.318  # lower = 1.088, upper = 1.370
+    later_line_isa = 1.116  # lower = 1.044, upper = 1.185
+    later_line_isa_retreat = 1.232  # lower = 1.088, upper = 1.370
     later_line_dara = 0.572  # lower = 0.551, upper = 0.594
     later_line_dara_retreat = 0.786  # lower = 0.776, upper = 0.797
     later_line_residual = 1.181  # lower = 1.171, upper = 1.190
@@ -93,7 +94,7 @@ def make_mortality_hazard_ratio():
     index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
     hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
 
-    hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.no_treatment, False)] = 1.0
+    hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
     line = models.MULTIPLE_MYELOMA_1_STATE_NAME
     hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = first_line_isa
@@ -101,10 +102,10 @@ def make_mortality_hazard_ratio():
     hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = first_line_residual
 
     for line in TREATMENT_LINES.tolist()[1:]:
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, True)] = later_line_isa
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = later_line_isa_retreat
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, True)] = later_line_dara
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = later_line_dara_retreat
+        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = later_line_isa
+        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, True)] = later_line_isa_retreat
+        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = later_line_dara
+        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, True)] = later_line_dara_retreat
         hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = later_line_residual
         hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = later_line_residual
 
@@ -115,6 +116,7 @@ def make_mortality_hazard_ratio():
     return hazard_ratio
 
 
+# TODO XXX: move to data values constants file if more cases
 PROBABILITY_RETREAT = 0.15
 
 
@@ -166,7 +168,7 @@ class MultipleMyelomaTreatmentCoverage:
         current_coverage = self.get_current_coverage(pop_data.creation_time)
         initial_mm_state = self.population_view.subview([models.MULTIPLE_MYELOMA_MODEL_NAME]).get(pop_data.index)
         pop_update = pd.DataFrame({
-            self.treatment_column: models.TREATMENTS.no_treatment,
+            self.treatment_column: models.TREATMENTS.not_treated,
             self.retreatment_eligible_column: 'unknown',
             self.retreated_column: False
         }, index=pop_data.index)
