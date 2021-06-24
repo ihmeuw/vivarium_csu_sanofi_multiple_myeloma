@@ -5,4 +5,4 @@ from vivarium_csu_sanofi_multiple_myeloma.components.treatment import (
     MultipleMyelomaTreatmentEffect,
 )
 
-from vivarium_csu_sanofi_multiple_myeloma.components.observers import MultipleMyelomaTreatmentObserver
+from vivarium_csu_sanofi_multiple_myeloma.components.observers import MortalityObserver, MultipleMyelomaTreatmentObserver
