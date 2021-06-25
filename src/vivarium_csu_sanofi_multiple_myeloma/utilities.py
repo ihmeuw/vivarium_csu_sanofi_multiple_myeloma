@@ -1,10 +1,13 @@
 import click
+import numpy as np
 import pandas as pd
 
-from typing import NamedTuple, Union, List
+from typing import Union, List
 from pathlib import Path
 from loguru import logger
+from scipy.stats import norm, lognorm
 
+from vivarium.framework.randomness import get_hash
 from vivarium_public_health.risks.data_transformations import pivot_categorical
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import metadata
@@ -75,5 +78,44 @@ def read_data_by_draw(artifact_path: str, key : str, draw: int) -> pd.DataFrame:
     data = pd.concat([index, draw], axis=1)
     data = data.drop(columns='location')
     data = pivot_categorical(data)
-    data[project_globals.LBWSG_MISSING_CATEGORY.CAT] = project_globals.LBWSG_MISSING_CATEGORY.EXPOSURE
     return data
+
+
+class LogNormalHazardRate:
+    """Defines an instance of a lognormal hazard rate normal distribution.
+    Parameters
+    ----------
+    name
+        string describing the distribution, used in seed creation
+    hr
+        mean of distribution
+    hr_upper
+        upper bound of truncnorm distribution
+    Returns
+    -------
+        An object with parameters for scipy.stats.lognorm
+    """
+
+    def __init__(self, name, hr: float, hr_upper: float, key=None):
+        self.hr = hr
+        self.hr_upper = hr_upper
+        q_975_stdnorm = norm().ppf(0.975)
+        mu = np.log(self.hr)
+        sigma = (np.log(self.hr_upper) - mu) / q_975_stdnorm
+        self.hr_distribution = lognorm(s=sigma, scale=self.hr)
+        self.key = key if key else name
+
+    def get_random_variable(self, draw: int) -> float:
+        """Gets a single random draw from a log normal hazard rate distribution.
+        Parameters
+        ----------
+        draw
+            Draw for this simulation
+        Returns
+        -------
+            The random variate from the log normal hazard rate distribution.
+        """
+        np.random.seed(get_hash(f'{self.key}_draw_{draw}'))
+        return self.hr_distribution.rvs()
+
+
