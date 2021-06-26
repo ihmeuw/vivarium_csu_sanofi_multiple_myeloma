@@ -239,3 +239,64 @@ class MultipleMyelomaTreatmentObserver:
 
     def __repr__(self):
         return f'{self.__class__.__name__}()'
+
+
+class SurvivalObserver:
+
+    configuration_defaults = {
+        'metrics': {
+            'observation_start': {
+                'year': 2021,
+                'month': 1,
+                'day': 1,
+            }
+        }
+    }
+
+    @property
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder: 'Builder') -> None:
+        config = builder.configuration.metrics.survival_observer
+        # Pull directly from config rather than the more flexible
+        # builder.time.step_size(). This component depends on a
+        # constant step size.
+        self.step_size = builder.configuration.time.step_size
+        self.bins = (pd.interval_range(0, 60*28, freq=self.step_size, closed='left')
+                     .append(pd.Index([pd.Interval(60*28, 1000*28)])))
+
+        self.observation_start = pd.Timestamp(**config.observation_start)
+
+        self.count_at_period_start = Counter()
+        self.progressions = Counter()
+        self.deaths = Counter()
+
+        self.population_view = builder.population.get_view(
+            [f'{s}_event_time' for s in models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES]
+            + [f'{s}_time_since_entrance' for s in models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES]
+            + [models.MULTIPLE_MYELOMA_MODEL_NAME, 'alive', 'exit_time']
+        )
+
+        builder.event.register_listener('collect_metrics', self.on_collect_metrics)
+
+    def on_collect_metrics(self, event: 'Event') -> None:
+        pop = self.population_view.get(event.index)
+        living = pop['alive'] == 'alive'
+        died_this_step = (pop['alive'] == 'dead') & (pop['exit_time'] == event.time)
+        in_denominator = living | died_this_step
+        states = list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES)
+        for current_state, next_state in zip(states, states[1:] + [states[-1]]):
+            left_censored = pop[f'{current_state}_event_time'] < self.observation_start
+            in_current_state_denominator = in_denominator & ~left_censored & (
+                # In the current state and didn't get there this time step
+                ((pop[models.MULTIPLE_MYELOMA_MODEL_NAME] == current_state)
+                 & (pop[f'{current_state}_event_time'] < event.time))
+                # or in the next state, but not til the start of the next step.
+                | ((pop[models.MULTIPLE_MYELOMA_MODEL_NAME] == next_state)
+                   & (pop[f'{next_state}_event_time'] == event.time))
+            )
+            time_since_entrance = pop.loc[in_current_state_denominator, f'{current_state}_time_since_entrance']
+            # group
+            grouping = pd.IntervalIndex(pd.cut(time_since_entrance, self.bins))
