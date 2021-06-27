@@ -284,7 +284,6 @@ class MultipleMyelomaTreatmentCoverage:
         return coverage
 
 
-
 class MultipleMyelomaTreatmentEffect:
 
     @property
