@@ -126,7 +126,6 @@ def MultipleMyeloma():
     states = [susceptible, mm_1]
 
     rr_mm_states = list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES[1:])
-
     for state_name in rr_mm_states:
         rr_mm_state = DiseaseStateHazard(state_name)
         rr_mm_state.allow_self_transitions()
