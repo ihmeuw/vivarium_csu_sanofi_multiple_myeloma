@@ -16,7 +16,6 @@ components:
         - MultipleMyelomaTreatmentObserver()
         - SurvivalObserver()
 
-
 configuration:
     input_data:
         input_draw_number: 0
@@ -62,4 +61,3 @@ configuration:
             by_sex: True
             by_year: True
     mm_treatment_scenario: 'baseline'
-
