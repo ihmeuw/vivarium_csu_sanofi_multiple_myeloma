@@ -271,10 +271,10 @@ class SurvivalObserver:
                      .append(pd.Index([pd.Interval(60*28, 1000*28)])))
 
         self.counts = Counter()
-        count_template = 'alive_at_day_{period_start}_line_{treatment_line}'
-        progression_template = 'progressed_by_day_{period_end}_line_{treatment_line}'
-        death_template = 'died_by_day_{period_end}_line_{treatment_line}'
-        self.sim_end_template = 'sim_end_on_{period_end}_line_{treatment_line}'
+        count_template = 'alive_at_period_{period_start}_line_{treatment_line}'
+        progression_template = 'progressed_by_period_{period_end}_line_{treatment_line}'
+        death_template = 'died_by_period_{period_end}_line_{treatment_line}'
+        self.sim_end_template = 'sim_end_on_period_{period_end}_line_{treatment_line}'
         self.templates = [
             ('alive', count_template),
             ('progressed', progression_template),
