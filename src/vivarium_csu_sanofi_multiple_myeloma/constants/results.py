@@ -31,6 +31,8 @@ YLDS_COLUMN_TEMPLATE = 'ylds_due_to_{CAUSE_OF_DISABILITY}_in_{YEAR}_among_{SEX}_
 STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
 TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
+SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}'
+SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}'
 
 COLUMN_TEMPLATES = {
     'population': TOTAL_POPULATION_COLUMN_TEMPLATE,
@@ -41,6 +43,8 @@ COLUMN_TEMPLATES = {
     'state_person_time': STATE_PERSON_TIME_COLUMN_TEMPLATE,
     'transition_count': TRANSITION_COUNT_COLUMN_TEMPLATE,
     'treatment_count': TREATMENT_COUNT_COLUMN_TEMPLATE,
+    'survival_alive': SURVIVAL_ALIVE_TEMPLATE,
+    'survival_other': SURVIVAL_OTHER_TEMPLATE,
 }
 
 NON_COUNT_TEMPLATES = [
@@ -86,6 +90,10 @@ CAUSES_OF_DISABILITY = (
     models.MULTIPLE_MYELOMA_5_STATE_NAME,
 )
 
+# CAUTION: This needs to change with the time step size.
+ALL_PERIODS = [i * 28 for i in range(61)] + [28*1000]
+
+
 TEMPLATE_FIELD_MAP = {
     'POP_STATE': POP_STATES,
     'YEAR': YEARS,
@@ -97,7 +105,11 @@ TEMPLATE_FIELD_MAP = {
     'TRANSITION': models.TRANSITIONS,
     'TREATMENT': models.TREATMENTS,
     'TREATMENT_LINE': list(range(1, 6)),
-    'BOOL': ('True', 'False')
+    'BOOL': ('True', 'False'),
+    'SURVIVAL_METRIC': ('progressed_by', 'died_by', 'sim_end_on'),
+    # CAUTION: This needs to change with the time step size.
+    'LEFT_PERIOD': ALL_PERIODS[:-1],
+    'RIGHT_PERIOD': ALL_PERIODS[1:],
 }
 
 

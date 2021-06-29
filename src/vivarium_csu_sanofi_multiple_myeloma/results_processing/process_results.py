@@ -33,6 +33,7 @@ def make_measure_data(data):
         state_person_time=get_state_person_time_measure_data(data, 'state_person_time'),
         transition_count=get_transition_count_measure_data(data, 'transition_count'),
         treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
+        survival=get_survival_measure_data(data),
     )
     return measure_data
 
@@ -46,6 +47,7 @@ class MeasureData(NamedTuple):
     state_person_time: pd.DataFrame
     transition_count: pd.DataFrame
     treatment_count: pd.DataFrame
+    survival: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
@@ -170,5 +172,14 @@ def get_treatment_count_measure_data(data, measure):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
     data['treatment'], data['year'] = data.process.str.split('_year_').str
     data['treatment_line'], data['process'] = data.process.str.split('_treatment_').str
+    data = data.drop(columns='process')
+    return sort_data(data)
+
+
+def get_survival_measure_data(data):
+    data = pivot_data(data[results.RESULT_COLUMNS('survival_alive') + results.RESULT_COLUMNS('survival_other') + GROUPBY_COLUMNS])
+    data['measure'], data['process'] = data.process.str.split('_period_').str
+    data['period'], data['treatment_line'] = data.process.str.split('_line_').str
+
     data = data.drop(columns='process')
     return sort_data(data)

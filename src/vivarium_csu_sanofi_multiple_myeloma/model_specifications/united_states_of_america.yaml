@@ -14,6 +14,7 @@ components:
         - MultipleMyelomaTreatmentCoverage()
         - MultipleMyelomaTreatmentEffect()
         - MultipleMyelomaTreatmentObserver()
+        - SurvivalObserver()
 
 configuration:
     input_data:
@@ -43,6 +44,10 @@ configuration:
         age_end: 95
 
     metrics:
+        observation_start:
+            year: 2021
+            month: 1
+            day: 1
         disability:
             by_age: True
             by_sex: True
