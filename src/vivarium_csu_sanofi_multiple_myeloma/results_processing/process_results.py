@@ -177,7 +177,7 @@ def get_treatment_count_measure_data(data, measure):
 
 
 def get_survival_measure_data(data):
-    data = pivot_data(data[results.RESULT_COLUMNS('survival') + GROUPBY_COLUMNS])
+    data = pivot_data(data[results.RESULT_COLUMNS('survival_alive') + results.RESULT_COLUMNS('survival_other') + GROUPBY_COLUMNS])
     data['measure'], data['process'] = data.process.str.split('_period_').str
     data['period'], data['treatment_line'] = data.process.str.split('_line_').str
     data = data.drop(columns='process')
