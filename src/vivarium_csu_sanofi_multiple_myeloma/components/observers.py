@@ -1,17 +1,18 @@
 import itertools
 from collections import Counter
-from typing import Callable, Dict, Iterable, List, Tuple
+
+from typing import Callable, Dict, Iterable, List, Tuple, TYPE_CHECKING
 
 import pandas as pd
 from vivarium.framework.engine import Builder
 from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
-from vivarium_public_health.metrics import MortalityObserver as MortalityObserver_
-from vivarium_public_health.metrics.utilities import (
-    get_deaths,
-    get_person_time,
-    get_years_of_life_lost,
-)
+
+from vivarium_public_health.metrics import MortalityObserver as MortalityObserver_, DiseaseObserver as DiseaseObserver_
+from vivarium_public_health.metrics.utilities import (get_deaths, get_person_time, get_state_person_time,
+                                                      get_transition_count,
+                                                      get_years_lived_with_disability, get_years_of_life_lost,
+                                                      TransitionString)
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import models, results
 
@@ -374,3 +375,49 @@ class SurvivalObserver:
         denominator = pop.loc[in_current_state_denominator].copy()
         denominator['group'] = pd.cut(denominator[f'{current_state}_time_since_entrance'], self.bins)
         return denominator
+
+                               
+class DiseaseObserver(DiseaseObserver_):
+
+    def __init__(self, disease: str, stratify_by_treatment: str = 'True'):
+        super().__init__(disease)
+        self.stratifier = ResultsStratifier(self.name, stratify_by_treatment == 'True')
+
+    @property
+    def sub_components(self) -> List[ResultsStratifier]:
+        return [self.stratifier]
+
+    @property
+    def name(self):
+        return f'{self.disease}_disease_observer'
+
+    def on_time_step_prepare(self, event: Event):
+        pop = self.population_view.get(event.index)
+        # Ignoring the edge case where the step spans a new year.
+        # Accrue all counts and time to the current year.
+        for labels, pop_in_group in self.stratifier.group(pop):
+            for state in self.states:
+                # noinspection PyTypeChecker
+                state_person_time_this_step = get_state_person_time(pop_in_group, self.config, self.disease, state,
+                                                                    self.clock().year, event.step_size, self.age_bins)
+                state_person_time_this_step = self.stratifier.update_labels(state_person_time_this_step, labels)
+                self.person_time.update(state_person_time_this_step)
+
+        # This enables tracking of transitions between states
+        prior_state_pop = self.population_view.get(event.index)
+        prior_state_pop[self.previous_state_column] = prior_state_pop[self.disease]
+        self.population_view.update(prior_state_pop)
+
+    def on_collect_metrics(self, event: Event):
+        pop = self.population_view.get(event.index)
+        for labels, pop_in_group in self.stratifier.group(pop):
+            for transition in self.transitions:
+                transition = TransitionString(transition)
+                # noinspection PyTypeChecker
+                transition_counts_this_step = get_transition_count(pop_in_group, self.config, self.disease, transition,
+                                                                   event.time, self.age_bins)
+                transition_counts_this_step = self.stratifier.update_labels(transition_counts_this_step, labels)
+                self.counts.update(transition_counts_this_step)
+
+    def __repr__(self) -> str:
+        return f"DiseaseObserver({self.disease})"
