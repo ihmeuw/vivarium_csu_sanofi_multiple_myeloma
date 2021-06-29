@@ -5,10 +5,10 @@ components:
             - Mortality()
         metrics:
             - DisabilityObserver()
-            - DiseaseObserver('multiple_myeloma')
 
     # Causes an error if left empty. Uncomment when you have components. 
     vivarium_csu_sanofi_multiple_myeloma.components:
+        - DiseaseObserver('multiple_myeloma', 'True')
         - MortalityObserver('True')
         - MultipleMyeloma()
         - MultipleMyelomaTreatmentCoverage()
