@@ -30,8 +30,8 @@ def make_measure_data(data):
         ylls=get_by_cause_measure_data(data, 'ylls', stratified_by_treatment=True),
         ylds=get_by_cause_measure_data(data, 'ylds'),
         deaths=get_by_cause_measure_data(data, 'deaths', stratified_by_treatment=True),
-        state_person_time=get_state_person_time_measure_data(data, 'state_person_time'),
-        transition_count=get_transition_count_measure_data(data, 'transition_count'),
+        state_person_time=get_state_person_time_measure_data(data, 'state_person_time', stratified_by_treatment=True),
+        transition_count=get_transition_count_measure_data(data, 'transition_count', stratified_by_treatment=True),
         treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
         survival=get_survival_measure_data(data),
     )
@@ -143,28 +143,28 @@ def get_population_data(data):
     return sort_data(total_pop)
 
 
-def get_measure_data(data, measure, stratified_by_treatment = False):
+def get_measure_data(data, measure, stratified_by_treatment=False):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
     data = split_processing_column(data, stratified_by_treatment)
     return sort_data(data)
 
 
-def get_by_cause_measure_data(data, measure, stratified_by_treatment = False):
+def get_by_cause_measure_data(data, measure, stratified_by_treatment=False):
     data = get_measure_data(data, measure, stratified_by_treatment)
     data['measure'], data['cause'] = data.measure.str.split('_due_to_').str
     return sort_data(data)
 
 
-def get_state_person_time_measure_data(data, measure):
-    data = get_measure_data(data, measure)
+def get_state_person_time_measure_data(data, measure, stratified_by_treatment):
+    data = get_measure_data(data, measure, stratified_by_treatment)
     data['measure'], data['cause'] = 'state_person_time', data.measure.str.split('_person_time').str[0]
     return sort_data(data)
 
 
-def get_transition_count_measure_data(data, measure):
+def get_transition_count_measure_data(data, measure, stratified_by_treatment):
     # Oops, edge case.
     data = data.drop(columns=[c for c in data.columns if 'event_count' in c and '2041' in c])
-    data = get_measure_data(data, measure)
+    data = get_measure_data(data, measure, stratified_by_treatment)
     return sort_data(data)
 
 
