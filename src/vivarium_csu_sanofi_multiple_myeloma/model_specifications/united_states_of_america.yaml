@@ -5,15 +5,16 @@ components:
             - Mortality()
         metrics:
             - DisabilityObserver()
-            - MortalityObserver()
-            - DiseaseObserver('multiple_myeloma')
 
     # Causes an error if left empty. Uncomment when you have components. 
     vivarium_csu_sanofi_multiple_myeloma.components:
+        - DiseaseObserver('multiple_myeloma', 'True')
+        - MortalityObserver('True')
         - MultipleMyeloma()
         - MultipleMyelomaTreatmentCoverage()
         - MultipleMyelomaTreatmentEffect()
         - MultipleMyelomaTreatmentObserver()
+        - SurvivalObserver()
 
 configuration:
     input_data:
@@ -33,16 +34,20 @@ configuration:
             month: 1
             day: 1
         end:
-            year: 2023
+            year: 2025
             month: 12
             day: 31
-        step_size: 180 # Days
+        step_size: 28 # Days
     population:
         population_size: 100000
         age_start: 15
         age_end: 95
 
     metrics:
+        observation_start:
+            year: 2021
+            month: 1
+            day: 1
         disability:
             by_age: True
             by_sex: True

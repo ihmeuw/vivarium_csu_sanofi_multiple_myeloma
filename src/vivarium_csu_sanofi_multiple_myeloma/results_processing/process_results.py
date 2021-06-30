@@ -26,13 +26,14 @@ OUTPUT_COLUMN_SORT_ORDER = [
 def make_measure_data(data):
     measure_data = MeasureData(
         population=get_population_data(data),
-        person_time=get_measure_data(data, 'person_time'),
-        ylls=get_by_cause_measure_data(data, 'ylls'),
+        person_time=get_measure_data(data, 'person_time', stratified_by_treatment=True),
+        ylls=get_by_cause_measure_data(data, 'ylls', stratified_by_treatment=True),
         ylds=get_by_cause_measure_data(data, 'ylds'),
-        deaths=get_by_cause_measure_data(data, 'deaths'),
-        state_person_time=get_state_person_time_measure_data(data, 'state_person_time'),
-        transition_count=get_transition_count_measure_data(data, 'transition_count'),
+        deaths=get_by_cause_measure_data(data, 'deaths', stratified_by_treatment=True),
+        state_person_time=get_state_person_time_measure_data(data, 'state_person_time', stratified_by_treatment=True),
+        transition_count=get_transition_count_measure_data(data, 'transition_count', stratified_by_treatment=True),
         treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
+        survival=get_survival_measure_data(data),
     )
     return measure_data
 
@@ -46,6 +47,7 @@ class MeasureData(NamedTuple):
     state_person_time: pd.DataFrame
     transition_count: pd.DataFrame
     treatment_count: pd.DataFrame
+    survival: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
@@ -120,10 +122,12 @@ def sort_data(data):
     return data.reset_index(drop=True)
 
 
-def split_processing_column(data):
-    # TODO the required splitting here is dependant on what types of stratification exist in the model
+def split_processing_column(data, stratified_by_treatment = False):
     # TODO find a better way to do this:
     #       FutureWarning: Columnar iteration over characters will be deprecated in future releases.
+    if stratified_by_treatment:
+        data['process'], data['retreated'] = data.process.str.split('_retreated_').str
+        data['process'], data['treatment'] = data.process.str.split('_treatment_state_').str
     data['process'], data['age'] = data.process.str.split('_in_age_group_').str
     data['process'], data['sex'] = data.process.str.split('_among_').str
     data['year'] = data.process.str.split('_in_').str[-1]
@@ -139,33 +143,43 @@ def get_population_data(data):
     return sort_data(total_pop)
 
 
-def get_measure_data(data, measure):
+def get_measure_data(data, measure, stratified_by_treatment=False):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
-    data = split_processing_column(data)
+    data = split_processing_column(data, stratified_by_treatment)
     return sort_data(data)
 
 
-def get_by_cause_measure_data(data, measure):
-    data = get_measure_data(data, measure)
+def get_by_cause_measure_data(data, measure, stratified_by_treatment=False):
+    data = get_measure_data(data, measure, stratified_by_treatment)
     data['measure'], data['cause'] = data.measure.str.split('_due_to_').str
     return sort_data(data)
 
 
-def get_state_person_time_measure_data(data, measure):
-    data = get_measure_data(data, measure)
+def get_state_person_time_measure_data(data, measure, stratified_by_treatment):
+    data = get_measure_data(data, measure, stratified_by_treatment)
     data['measure'], data['cause'] = 'state_person_time', data.measure.str.split('_person_time').str[0]
     return sort_data(data)
 
 
-def get_transition_count_measure_data(data, measure):
+def get_transition_count_measure_data(data, measure, stratified_by_treatment):
     # Oops, edge case.
     data = data.drop(columns=[c for c in data.columns if 'event_count' in c and '2041' in c])
-    data = get_measure_data(data, measure)
+    data = get_measure_data(data, measure, stratified_by_treatment)
     return sort_data(data)
+
 
 def get_treatment_count_measure_data(data, measure):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
-    data['treatment_line'], data['process'] = data.process.str.split('_treatment_').str
     data['treatment'], data['year'] = data.process.str.split('_year_').str
+    data['treatment_line'], data['process'] = data.process.str.split('_treatment_').str
+    data = data.drop(columns='process')
+    return sort_data(data)
+
+
+def get_survival_measure_data(data):
+    data = pivot_data(data[results.RESULT_COLUMNS('survival_alive') + results.RESULT_COLUMNS('survival_other') + GROUPBY_COLUMNS])
+    data['measure'], data['process'] = data.process.str.split('_period_').str
+    data['period'], data['treatment_line'] = data.process.str.split('_line_').str
+
     data = data.drop(columns='process')
     return sort_data(data)
