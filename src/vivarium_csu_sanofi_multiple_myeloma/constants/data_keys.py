@@ -62,6 +62,8 @@ class __MultipleMyeloma(NamedTuple):
     LINE_5_DISABILITY_WEIGHT: TargetString = TargetString('cause.multiple_myeloma_5.disability_weight')
     LINE_5_EMR: TargetString = TargetString('cause.multiple_myeloma_5.excess_mortality_rate')
 
+    GBD_CSMR: TargetString = TargetString('cause.multiple_myeloma_gbd.cause_specific_mortality_rate')
+
     @property
     def name(self):
         return 'multiple_myeloma'
