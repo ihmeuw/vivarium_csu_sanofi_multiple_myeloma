@@ -113,7 +113,7 @@ def MultipleMyeloma():
         models.MULTIPLE_MYELOMA_MODEL_NAME,
         get_data_functions={
             'excess_mortality_rate': lambda *_, builder: (
-                builder.data.load(data_keys.MULTIPLE_MYELOMA.CSMR)  # EMR_s = ACMR - CSMR
+                builder.data.load(data_keys.POPULATION.ACMR)  # EMR_s = ACMR - CSMR
                 - builder.data.load(data_keys.MULTIPLE_MYELOMA.GBD_CSMR)),
         }
     )

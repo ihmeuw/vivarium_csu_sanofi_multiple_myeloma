@@ -52,7 +52,7 @@ NON_COUNT_TEMPLATES = [
 
 POP_STATES = ('living', 'dead', 'tracked', 'untracked')
 SEXES = ('male', 'female')
-YEARS = tuple(range(2021, 2026))
+YEARS = tuple(range(2011, 2026))
 AGE_GROUPS = (
     '15_to_19',
     '20_to_24',
