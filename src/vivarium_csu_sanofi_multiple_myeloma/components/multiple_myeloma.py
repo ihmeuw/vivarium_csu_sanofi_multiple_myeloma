@@ -109,8 +109,8 @@ class DiseaseStateHazard(DiseaseState):
 
 
 class SusceptibleStateWithEMR(SusceptibleState):
-    def __init__(self, get_data_functions=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, cause, get_data_functions=None, *args, **kwargs):
+        super().__init__(cause, *args, **kwargs)
         self._get_data_functions = get_data_functions if get_data_functions is not None else {}
 
     def add_transition(self, output, source_data_type=None, get_data_functions=None, **kwargs):
@@ -200,9 +200,7 @@ def MultipleMyeloma():
     susceptible = SusceptibleStateWithEMR(
         models.MULTIPLE_MYELOMA_MODEL_NAME,
         get_data_functions={
-            'excess_mortality_rate': lambda *_, builder: (
-                builder.data.load(data_keys.POPULATION.ACMR)  # EMR_s = ACMR - CSMR
-                - builder.data.load(data_keys.MULTIPLE_MYELOMA.GBD_CSMR)),
+            'excess_mortality_rate': lambda _, builder: builder.data.load(data_keys.MULTIPLE_MYELOMA.SUSCEPTIBLE_EMR),
         }
     )
     susceptible.allow_self_transitions()
