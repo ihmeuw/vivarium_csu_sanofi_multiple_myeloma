@@ -186,9 +186,9 @@ class MortalityObserver(MortalityObserver_):
         pop.loc[pop.exit_time.isnull(), 'exit_time'] = self.clock()
 
         measure_getters = (
-            (get_deaths, (self.causes,)),
+            (get_deaths, (self.causes + [models.SUSCEPTIBLE_STATE_NAME],)),
             (get_person_time, ()),
-            (get_years_of_life_lost, (self.life_expectancy, self.causes)),
+            (get_years_of_life_lost, (self.life_expectancy, self.causes + [models.SUSCEPTIBLE_STATE_NAME])),
         )
 
         for labels, pop_in_group in self.stratifier.group(pop):
