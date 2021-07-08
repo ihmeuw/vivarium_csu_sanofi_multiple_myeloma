@@ -50,7 +50,7 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MULTIPLE_MYELOMA.PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_1_STATE_NAME),
         data_keys.MULTIPLE_MYELOMA.INCIDENCE_RATE: load_standard_data,
         data_keys.MULTIPLE_MYELOMA.DISABILITY_WEIGHT: load_rrmm_disability_weight,
-        data_keys.MULTIPLE_MYELOMA.CSMR: load_standard_data,
+        data_keys.MULTIPLE_MYELOMA.CSMR: load_acmr,
         data_keys.MULTIPLE_MYELOMA.RESTRICTIONS: load_metadata,
 
         data_keys.MULTIPLE_MYELOMA.LINE_1_PREVALENCE: load_rrmm_prevalence(models.MULTIPLE_MYELOMA_1_STATE_NAME),
@@ -70,6 +70,9 @@ def get_data(lookup_key: str, location: str) -> pd.DataFrame:
         data_keys.MULTIPLE_MYELOMA.LINE_3_EMR: load_rrmm_emr,
         data_keys.MULTIPLE_MYELOMA.LINE_4_EMR: load_rrmm_emr,
         data_keys.MULTIPLE_MYELOMA.LINE_5_EMR: load_rrmm_emr,
+
+        data_keys.MULTIPLE_MYELOMA.GBD_CSMR: load_gbd_csmr,
+        data_keys.MULTIPLE_MYELOMA.SUSCEPTIBLE_EMR: load_susceptible_emr,
     }
     return mapping[lookup_key](lookup_key, location)
 
@@ -125,7 +128,15 @@ def _load_em_from_meid(location, meid, measure):
 
 
 # TODO - add project-specific data functions here
-def load_rrmm_prevalence(state: str):
+def load_acmr(key: str, location) -> pd.DataFrame:
+    return load_standard_data('cause.all_causes.cause_specific_mortality_rate', location)
+
+
+def load_gbd_csmr(key: str, location) -> pd.DataFrame:
+    return load_standard_data('cause.multiple_myeloma.cause_specific_mortality_rate', location)
+
+
+def load_rrmm_prevalence(state: str) -> pd.DataFrame:
     state_multipliers = {
         models.MULTIPLE_MYELOMA_1_STATE_NAME: 1.,
         models.MULTIPLE_MYELOMA_2_STATE_NAME: 0.,
@@ -134,7 +145,7 @@ def load_rrmm_prevalence(state: str):
         models.MULTIPLE_MYELOMA_5_STATE_NAME: 0.,
     }
 
-    def _load_rrmm_prevalence(key, location):
+    def _load_rrmm_prevalence(key, location) -> pd.DataFrame:
         return load_standard_data('cause.multiple_myeloma.prevalence', location) * state_multipliers[state]
     return _load_rrmm_prevalence
 
@@ -145,6 +156,13 @@ def load_rrmm_disability_weight(key: str, location):
 
 def load_rrmm_emr(key: str, location):
     return load_standard_data('cause.multiple_myeloma.excess_mortality_rate', location)
+
+
+def load_susceptible_emr(key: str, location):
+    INDEX_COLUMNS = ['sex', 'age_start', 'age_end', 'year_start', 'year_end']
+    return (load_acmr(key, location).reset_index().set_index(INDEX_COLUMNS)
+            - load_gbd_csmr(key, location).reset_index().set_index(INDEX_COLUMNS))
+
 
 def get_entity(key: str):
     # Map of entity types to their gbd mappings.

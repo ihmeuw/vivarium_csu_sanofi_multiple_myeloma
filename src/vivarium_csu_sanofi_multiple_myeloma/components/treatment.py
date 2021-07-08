@@ -38,8 +38,8 @@ def make_treatment_coverage(year, scenario):
 
     coverage_data = coverages[(year, scenario)]
     coverage = pd.DataFrame({
-        models.TREATMENTS.isatuxamib: coverage_data[0],
-        models.TREATMENTS.daratumamab: coverage_data[1],
+        models.TREATMENTS.isatuximab: coverage_data[0],
+        models.TREATMENTS.daratumumab: coverage_data[1],
     }, index=TREATMENT_LINES)
     coverage[models.TREATMENTS.residual] = 1 - coverage.sum(axis=1)
     return coverage
@@ -52,15 +52,15 @@ def make_progression_hazard_ratio(draw: int):
     hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
     line = models.MULTIPLE_MYELOMA_1_STATE_NAME
-    hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_ISA.get_random_variable(draw)
-    hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_DARA.get_random_variable(draw)
+    hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_ISA.get_random_variable(draw)
+    hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_DARA.get_random_variable(draw)
     hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_RESIDUAL.get_random_variable(draw)
 
     for line in TREATMENT_LINES.tolist()[1:]:
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_ISA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_ISA_RETREAT.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_DARA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_DARA_RETREAT.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_ISA.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_ISA_RETREAT.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_DARA.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_DARA_RETREAT.get_random_variable(draw)
         hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
         hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
 
@@ -78,15 +78,15 @@ def make_mortality_hazard_ratio(draw: int):
     hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
     line = models.MULTIPLE_MYELOMA_1_STATE_NAME
-    hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_ISA.get_random_variable(draw)
-    hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_DARA.get_random_variable(draw)
+    hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_ISA.get_random_variable(draw)
+    hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_DARA.get_random_variable(draw)
     hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_RESIDUAL.get_random_variable(draw)
 
     for line in TREATMENT_LINES.tolist()[1:]:
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_ISA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuxamib, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_ISA_RETREAT.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_DARA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumamab, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_DARA_RETREAT.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_ISA.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_ISA_RETREAT.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_DARA.get_random_variable(draw)
+        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_DARA_RETREAT.get_random_variable(draw)
         hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
         hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
 
@@ -119,7 +119,7 @@ class MultipleMyelomaTreatmentCoverage:
 
         # What treatment are they currently on.
         self.treatment_column = 'multiple_myeloma_treatment'
-        # Did they previously recieve isatuxamib or daratumumab
+        # Did they previously recieve isatuximab or daratumumab
         self.retreatment_eligible_column = 'retreatment_eligible'
         self.retreated_column = 'retreated'
         columns_created = [
@@ -166,7 +166,7 @@ class MultipleMyelomaTreatmentCoverage:
         )
         pop_update.loc[with_mm.index, self.treatment_column] = treatment
         dara_or_isa = pop_update[self.treatment_column].isin(
-            [models.TREATMENTS.daratumamab, models.TREATMENTS.isatuxamib]
+            [models.TREATMENTS.daratumumab, models.TREATMENTS.isatuximab]
         )
         pop_update.loc[dara_or_isa, self.retreatment_eligible_column] = 'true'
         self.population_view.update(pop_update)
@@ -183,12 +183,12 @@ class MultipleMyelomaTreatmentCoverage:
         lines = TREATMENT_LINES.tolist()
         for current_line, previous_line in zip(lines, [None] + lines[:-1]):
             # First, unpack probabilities for the current and previous line.
-            p_isa_c = coverage.at[current_line, models.TREATMENTS.isatuxamib]
-            p_dara_c = coverage.at[current_line, models.TREATMENTS.daratumamab]
+            p_isa_c = coverage.at[current_line, models.TREATMENTS.isatuximab]
+            p_dara_c = coverage.at[current_line, models.TREATMENTS.daratumumab]
             p_resid_c = coverage.at[current_line, models.TREATMENTS.residual]
             if previous_line:
-                p_isa_p = coverage.at[previous_line, models.TREATMENTS.isatuxamib]
-                p_dara_p = coverage.at[previous_line, models.TREATMENTS.daratumamab]
+                p_isa_p = coverage.at[previous_line, models.TREATMENTS.isatuximab]
+                p_dara_p = coverage.at[previous_line, models.TREATMENTS.daratumumab]
                 p_resid_p = coverage.at[previous_line, models.TREATMENTS.residual]
             else:
                 p_isa_p, p_dara_p, p_resid_p = 0., 0., 1.
@@ -198,7 +198,7 @@ class MultipleMyelomaTreatmentCoverage:
 
             # First group, getting their 2nd+ round of isa/dara
             retreat = new_treatment_line & retreatment_eligible & retreat_mask
-            retreat_choices = [models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab]
+            retreat_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab]
             retreat_probs = [p_isa_c / (p_isa_c + p_dara_c), p_dara_c / (p_isa_c + p_dara_c)]
 
             pop.loc[retreat, self.treatment_column] = self.randomness.choice(
@@ -221,7 +221,7 @@ class MultipleMyelomaTreatmentCoverage:
 
             # Third group, getting their first dose of isa/dara and determining if they can be retreated.
             unknown_retreat = new_treatment_line & retreatment_unknown
-            unknown_choices = [models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab, models.TREATMENTS.residual]
+            unknown_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab, models.TREATMENTS.residual]
             # TODO: add a link to the docs when they're live for this algorithm.
             old_to_new_scale = (p_isa_p + p_dara_p) / (p_isa_c + p_dara_c)
             final_scale = (1 - PROBABILITY_RETREAT * old_to_new_scale) / p_resid_p
@@ -238,7 +238,7 @@ class MultipleMyelomaTreatmentCoverage:
                 p=unknown_treatment_probs,
             )
             isa_or_dara = pop[self.treatment_column].isin([
-                models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab
+                models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab
             ])
             pop.loc[unknown_retreat & isa_or_dara, self.retreatment_eligible_column] = 'true'
             # These are no-ops.  Here for clarity.
@@ -248,7 +248,7 @@ class MultipleMyelomaTreatmentCoverage:
         self.population_view.update(pop)
 
     def get_current_coverage(self, time: pd.Timestamp) -> pd.DataFrame:
-        """Get a df with columns: [TREATMENTS.isatuxamib, TREATMENTS.daratumamab, TREATMENTS.residual]
+        """Get a df with columns: [TREATMENTS.isatuximab, TREATMENTS.daratumumab, TREATMENTS.residual]
         indexed by multiple myeloma state."""
         if time.year < 2021:
             return self.coverage_2021
@@ -256,7 +256,7 @@ class MultipleMyelomaTreatmentCoverage:
             return self.coverage_2025
         t = (time - pd.Timestamp('2021-01-01')) / (pd.Timestamp('2026-01-01') - pd.Timestamp('2021-01-01'))
 
-        treatments = [models.TREATMENTS.isatuxamib, models.TREATMENTS.daratumamab]
+        treatments = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab]
         slope = self.coverage_2025[treatments] - self.coverage_2021[treatments]
         coverage = self.coverage_2021[treatments] + slope * t
         coverage[models.TREATMENTS.residual] = 1 - coverage.sum(axis=1)

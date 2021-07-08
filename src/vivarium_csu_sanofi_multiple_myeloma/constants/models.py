@@ -55,8 +55,8 @@ TRANSITIONS = tuple(state for model in STATE_MACHINE_MAP.values() for state in m
 
 class __Treatments(NamedTuple):
     not_treated: str
-    isatuxamib: str
-    daratumamab: str
+    isatuximab: str
+    daratumumab: str
     residual: str
 
 

@@ -108,8 +108,101 @@ class DiseaseStateHazard(DiseaseState):
             return super().add_transition(output, source_data_type, get_data_functions, **kwargs)
 
 
+class SusceptibleStateWithEMR(SusceptibleState):
+    def __init__(self, cause, get_data_functions=None, *args, **kwargs):
+        super().__init__(cause, *args, **kwargs)
+        self._get_data_functions = get_data_functions if get_data_functions is not None else {}
+
+    def add_transition(self, output, source_data_type=None, get_data_functions=None, **kwargs):
+        if source_data_type == 'rate':
+            if get_data_functions is None:
+                get_data_functions = {
+                    'incidence_rate':
+                        lambda cause, builder: builder.data.load(f"{self.cause_type}.{cause}.incidence_rate")
+                }
+            elif 'incidence_rate' not in get_data_functions:
+                raise ValueError('You must supply an incidence rate function.')
+        elif source_data_type == 'proportion':
+            if 'proportion' not in get_data_functions:
+                raise ValueError('You must supply a proportion function.')
+
+        return super().add_transition(output, source_data_type, get_data_functions, **kwargs)
+
+    def with_condition(self, index):
+        pop = self.population_view.subview(['alive', self._model]).get(index)
+        with_condition = pop.loc[(pop[self._model] == self.state_id) & (pop['alive'] == 'alive')].index
+        return with_condition
+
+    def load_excess_mortality_rate_data(self, builder):
+        only_morbid = builder.data.load(f'cause.{self._model}.restrictions')['yld_only']
+        if 'excess_mortality_rate' in self._get_data_functions:
+            return self._get_data_functions['excess_mortality_rate'](self.cause, builder)
+        elif only_morbid:
+            return 0
+        else:
+            return builder.data.load(f'{self.cause_type}.{self.cause}.excess_mortality_rate')
+
+    def compute_excess_mortality_rate(self, index):
+        excess_mortality_rate = pd.Series(0, index=index)
+        with_condition = self.with_condition(index)
+        base_excess_mort = self.base_excess_mortality_rate(with_condition)
+        joint_mediated_paf = self.joint_paf(with_condition)
+        excess_mortality_rate.loc[with_condition] = base_excess_mort * (1 - joint_mediated_paf.values)
+        return excess_mortality_rate
+
+    def adjust_mortality_rate(self, index, rates_df):
+        """Modifies the baseline mortality rate for a simulant if they are in this state.
+
+        Parameters
+        ----------
+        index
+            An iterable of integer labels for the simulants.
+        rates_df : `pandas.DataFrame`
+
+        """
+        rate = self.excess_mortality_rate(index, skip_post_processor=True)
+        rates_df[self.state_id] = rate
+        return rates_df
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder):
+        """Performs this component's simulation setup.
+
+        Parameters
+        ----------
+        builder : `engine.Builder`
+            Interface to several simulation tools.
+        """
+        super().setup(builder)
+        excess_mortality_data = self.load_excess_mortality_rate_data(builder)
+        self.base_excess_mortality_rate = builder.lookup.build_table(excess_mortality_data, key_columns=['sex'],
+                                                                     parameter_columns=['age', 'year'])
+        self.excess_mortality_rate = builder.value.register_rate_producer(
+            f'{self.state_id}.excess_mortality_rate',
+            source=self.compute_excess_mortality_rate,
+            requires_columns=['age', 'sex', 'alive', self._model],
+            requires_values=[f'{self.state_id}.excess_mortality_rate.population_attributable_fraction']
+        )
+        paf = builder.lookup.build_table(0)
+        self.joint_paf = builder.value.register_value_producer(
+            f'{self.state_id}.excess_mortality_rate.population_attributable_fraction',
+            source=lambda idx: [paf(idx)],
+            preferred_combiner=list_combiner,
+            preferred_post_processor=union_post_processor
+        )
+        builder.value.register_value_modifier('mortality_rate',
+                                              modifier=self.adjust_mortality_rate,
+                                              requires_values=[f'{self.state_id}.excess_mortality_rate'])
+
+
 def MultipleMyeloma():
-    susceptible = SusceptibleState(models.MULTIPLE_MYELOMA_MODEL_NAME)
+    # TODO: change to disease state, call it susceptible
+    susceptible = SusceptibleStateWithEMR(
+        models.MULTIPLE_MYELOMA_MODEL_NAME,
+        get_data_functions={
+            'excess_mortality_rate': lambda _, builder: builder.data.load(data_keys.MULTIPLE_MYELOMA.SUSCEPTIBLE_EMR),
+        }
+    )
     susceptible.allow_self_transitions()
 
     mm_1 = DiseaseStateHazard(models.MULTIPLE_MYELOMA_1_STATE_NAME)
@@ -135,7 +228,7 @@ def MultipleMyeloma():
         )
         states.append(rr_mm_state)
 
-    return DiseaseModel(models.MULTIPLE_MYELOMA_MODEL_NAME, states=states)
+    return DiseaseModel(models.MULTIPLE_MYELOMA_MODEL_NAME, states=states, initial_state=susceptible)
 
 
 def load_hazard_rate(builder: 'Builder', state_id, measure):
