@@ -1,7 +1,9 @@
 import os
+import random
 import numpy as np
 import pandas as pd
 from scipy import interpolate
+from scipy.stats import norm
 
 def calc_events(N: pd.Series, S: pd.Series) -> pd.Series:
     """
