@@ -104,6 +104,6 @@ if __name__ == '__main__':
     for i in list(range(0,len(treatment_lines))):
         df_mortality = get_results(input_dir, 'overall_survival', treatment_lines[i], 1000, seeds[i])
         df_incidence = get_results(input_dir, 'progression_free_survival', treatment_lines[i], 1000, seeds[i])
-        #test_for_illogical_draws(df_incidence, df_mortality, treatment_lines[i])
+        test_for_illogical_draws(df_incidence, df_mortality, treatment_lines[i])
         df_mortality.to_csv(os.path.join(output_dir, f'mortality {treatment_lines[i]}.csv'), index=False)
         df_incidence.to_csv(os.path.join(output_dir, f'incidence {treatment_lines[i]}.csv'), index=False)
