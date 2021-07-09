@@ -123,7 +123,8 @@ if __name__ == '__main__':
     for line in ['First-line', 'Second-line', 'Third-line', 'Fourth-line', 'Fifth-line']:
         df_mortality = get_results(input_dir, 'overall_survival', line, 1000)
         df_incidence = get_results(input_dir, 'progression_free_survival', line, 1000)
-        if (df_incidence.set_index(idx_cols) - df_mortality.set_index(idx_cols) < 0).any():
+        diff = df_incidence.set_index(idx_cols) - df_mortality.set_index(idx_cols)
+        if (diff.values < 0).any():
             df_mortality, df_incidence = select_draws(input_dir, line, 2000, idx_cols)        
         df_mortality.to_csv(os.path.join(output_dir, f'mortality {line}.csv'), index=False)
         df_incidence.to_csv(os.path.join(output_dir, f'incidence {line}.csv'), index=False)
