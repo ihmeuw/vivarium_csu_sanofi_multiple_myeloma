@@ -97,7 +97,7 @@ def select_draws(input_dir: str, line: str, ndraws: int, idx_cols: list):
     output 1000 draws where incidence > mortality for each draw
     """
     assert ndraws > 1000, 'Insert ndraws greater than 1000'
-    mortality = get_results(input_dir, 'overall_survival', line, ndraws).set_index(indx_cols)
+    mortality = get_results(input_dir, 'overall_survival', line, ndraws).set_index(idx_cols)
     incidence = get_results(input_dir, 'progression_free_survival', line, ndraws).set_index(idx_cols)
     unwanted_draws = []
     draws = list(range(ndraws))
