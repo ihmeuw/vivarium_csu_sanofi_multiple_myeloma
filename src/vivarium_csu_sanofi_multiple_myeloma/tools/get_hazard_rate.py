@@ -1,5 +1,4 @@
 import os
-import random
 import numpy as np
 import pandas as pd
 from scipy import interpolate
@@ -41,7 +40,7 @@ def get_S_draws(S: pd.Series, Var_S: list, num: int, ndraws: int, seed=123) -> p
     """
     Sample n draws of S(t) from Normal(mean=S(t), sd=sqrt(var_S(t))) for each t
     """
-    random.seed(seed)
+    np.random.seed(seed)
     percentiles = np.random.uniform(low=0, high=1, size=ndraws)
     df = pd.DataFrame({'t_0': [1]*ndraws})
     for i in range(1, num, 1):
