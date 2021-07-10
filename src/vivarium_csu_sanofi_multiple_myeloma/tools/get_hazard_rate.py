@@ -44,10 +44,8 @@ def get_S_draws(S: pd.Series, Var_S: list, num: int, ndraws: int, seed=123) -> p
     percentiles = np.random.uniform(low=0, high=1, size=ndraws)
     df = pd.DataFrame({'t_0': [1]*ndraws})
     for i in range(1, num, 1):
-        S_i = []
         dist = norm(loc=S.loc[i], scale=np.sqrt(Var_S[i]))
-        for p in percentiles:
-            S_i.append(dist.ppf(p))
+        S_i = dist.ppf(percentiles)
         df[f't_{i*10}'] = np.clip(S_i, 0, df[f't_{(i-1)*10}']) # 0 <= S(t) <= S(t-1)  
     return df.transpose().reset_index(drop=True)
 
