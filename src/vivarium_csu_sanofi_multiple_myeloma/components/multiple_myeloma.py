@@ -245,7 +245,6 @@ def load_hazard_rate(builder: 'Builder', state_id, measure):
         (models.MULTIPLE_MYELOMA_2_STATE_NAME, "incidence"): paths.INCIDENCE_SECOND_LINE_PATH,
         (models.MULTIPLE_MYELOMA_3_STATE_NAME, "incidence"): paths.INCIDENCE_THIRD_LINE_PATH,
         (models.MULTIPLE_MYELOMA_4_STATE_NAME, "incidence"): paths.INCIDENCE_FOURTH_LINE_PATH,
-        (models.MULTIPLE_MYELOMA_5_STATE_NAME, "incidence"): paths.INCIDENCE_FIFTH_LINE_PATH,
     }
     hazard_rate_data = pd.read_csv(data_map.get((state_id, measure), paths.MORTALITY_FIRST_LINE_PATH))
     hazard_rate_data[f'{state_id}_time_since_entrance_start'] = hazard_rate_data[
