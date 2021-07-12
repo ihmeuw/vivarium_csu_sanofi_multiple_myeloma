@@ -54,14 +54,14 @@ def make_hazard_ratios(draw: int):
     os_hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
     for key in PFS_HR:
-        random_seed = '_'.join([str(k) for k in key] + [draw])
+        random_seed = '_'.join([str(k) for k in key] + [str(draw)])
         rs = np.random.RandomState(random_seed)
         survival_percentile = rs.random()
         pfs_hazard_ratio.loc[key] = LogNormalHazardRate(*PFS_HR[key]).get_random_variable(survival_percentile)
         os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
 
     for key in set(OS_HR).difference(PFS_HR):
-        random_seed = '_'.join([str(k) for k in key] + [draw])
+        random_seed = '_'.join([str(k) for k in key] + [str(draw)])
         rs = np.random.RandomState(random_seed)
         survival_percentile = rs.random()
         os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
