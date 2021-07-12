@@ -96,26 +96,24 @@ class LogNormalHazardRate:
         An object with parameters for scipy.stats.lognorm
     """
 
-    def __init__(self, name, hr: float, hr_upper: float, key=None):
+    def __init__(self, hr: float, hr_lower: float, hr_upper: float):
         self.hr = hr
         self.hr_upper = hr_upper
         q_975_stdnorm = norm().ppf(0.975)
         mu = np.log(self.hr)
         sigma = (np.log(self.hr_upper) - mu) / q_975_stdnorm
         self.hr_distribution = lognorm(s=sigma, scale=self.hr)
-        self.key = key if key else name
 
-    def get_random_variable(self, draw: int) -> float:
+    def get_random_variable(self, percentile: float) -> float:
         """Gets a single random draw from a log normal hazard rate distribution.
         Parameters
         ----------
-        draw
-            Draw for this simulation
+        percentile
+            Percentile for sample.
         Returns
         -------
             The random variate from the log normal hazard rate distribution.
         """
-        np.random.seed(get_hash(f'{self.key}_draw_{draw}'))
-        return self.hr_distribution.rvs()
+        return self.hr_distribution.ppf(percentile)
 
 

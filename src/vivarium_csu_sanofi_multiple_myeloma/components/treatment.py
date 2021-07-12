@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS
-from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (PROGRESSION_HAZARD_RATE,
-                                                                        MORTALITY_HAZARD_RATE,
-                                                                        PROBABILITY_RETREAT)
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (OS_HR, PFS_HR, PROBABILITY_RETREAT)
+from vivarium_csu_sanofi_multiple_myeloma.utilities import LogNormalHazardRate
 
 if TYPE_CHECKING:
     from vivarium.framework.engine import Builder
@@ -45,56 +45,37 @@ def make_treatment_coverage(year, scenario):
     return coverage
 
 
-def make_progression_hazard_ratio(draw: int):
+def make_hazard_ratios(draw: int):
     index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
-    hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
+    pfs_hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
+    os_hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
 
-    hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
+    pfs_hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
+    os_hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
-    line = models.MULTIPLE_MYELOMA_1_STATE_NAME
-    hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_ISA.get_random_variable(draw)
-    hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_DARA.get_random_variable(draw)
-    hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = PROGRESSION_HAZARD_RATE.FIRST_LINE_RESIDUAL.get_random_variable(draw)
+    for key in PFS_HR:
+        random_seed = '_'.join([str(k) for k in key] + [draw])
+        rs = np.random.RandomState(random_seed)
+        survival_percentile = rs.random()
+        pfs_hazard_ratio.loc[key] = LogNormalHazardRate(*PFS_HR[key]).get_random_variable(survival_percentile)
+        os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
 
-    for line in TREATMENT_LINES.tolist()[1:]:
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_ISA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_ISA_RETREAT.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_DARA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_DARA_RETREAT.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = PROGRESSION_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = PROGRESSION_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
+    for key in set(OS_HR).difference(PFS_HR):
+        random_seed = '_'.join([str(k) for k in key] + [draw])
+        rs = np.random.RandomState(random_seed)
+        survival_percentile = rs.random()
+        os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
 
-    hazard_ratio = hazard_ratio.reset_index()
+    pfs_hazard_ratio = pfs_hazard_ratio.reset_index()
+    os_hazard_ratio = os_hazard_ratio.reset_index()
+
     # FIXME: Super-duper hack to make lookup table work.  Need at least one continuous parameter.
-    hazard_ratio['year_start'] = 1990
-    hazard_ratio['year_end'] = 2100
-    return hazard_ratio
+    pfs_hazard_ratio['year_start'] = 1990
+    pfs_hazard_ratio['year_end'] = 2100
+    os_hazard_ratio['year_start'] = 1990
+    os_hazard_ratio['year_end'] = 2100
 
-
-def make_mortality_hazard_ratio(draw: int):
-    index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
-    hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
-
-    hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
-
-    line = models.MULTIPLE_MYELOMA_1_STATE_NAME
-    hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_ISA.get_random_variable(draw)
-    hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_DARA.get_random_variable(draw)
-    hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = MORTALITY_HAZARD_RATE.FIRST_LINE_RESIDUAL.get_random_variable(draw)
-
-    for line in TREATMENT_LINES.tolist()[1:]:
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_ISA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.isatuximab, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_ISA_RETREAT.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_DARA.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.daratumumab, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_DARA_RETREAT.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.residual, True)] = MORTALITY_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
-        hazard_ratio.loc[(line, models.TREATMENTS.residual, False)] = MORTALITY_HAZARD_RATE.LATER_LINE_RESIDUAL.get_random_variable(draw)
-
-    hazard_ratio = hazard_ratio.reset_index()
-    # FIXME: Super-duper hack to make lookup table work.  Need at least one continuous parameter.
-    hazard_ratio['year_start'] = 1990
-    hazard_ratio['year_end'] = 2100
-    return hazard_ratio
+    return pfs_hazard_ratio, os_hazard_ratio
 
 
 class MultipleMyelomaTreatmentCoverage:
@@ -272,13 +253,12 @@ class MultipleMyelomaTreatmentEffect:
     def setup(self, builder: 'Builder') -> None:
         draw = builder.configuration.input_data.input_draw_number
         required_columns = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
-        progression_hazard_ratio = make_progression_hazard_ratio(draw)
+        progression_hazard_ratio, mortality_hazard_ratio = make_hazard_ratios(draw)
         self.progression_hazard_ratio = builder.lookup.build_table(
             progression_hazard_ratio,
             key_columns=required_columns,
             parameter_columns=['year']
         )
-        mortality_hazard_ratio = make_mortality_hazard_ratio(draw)
         self.mortality_hazard_ratio = builder.lookup.build_table(
             mortality_hazard_ratio,
             key_columns=required_columns,
