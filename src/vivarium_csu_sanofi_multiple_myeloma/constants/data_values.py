@@ -1,54 +1,53 @@
-from typing import NamedTuple
-
-from vivarium_csu_sanofi_multiple_myeloma.utilities import LogNormalHazardRate
+from vivarium_csu_sanofi_multiple_myeloma.constants import models
 
 
-# Progression hazard ratios
-class __ProgressionHazardRate(NamedTuple):
-    FIRST_LINE_ISA: LogNormalHazardRate = LogNormalHazardRate("first_line_isa", 0.429, 0.495) # lower = 0.368, upper = 0.495
-    FIRST_LINE_DARA: LogNormalHazardRate = LogNormalHazardRate("first_line_dara", 0.429, 0.495) # lower = 0.368, upper = 0.495
-    FIRST_LINE_RESIDUAL: LogNormalHazardRate = LogNormalHazardRate("first_line_residual", 1.00581, 1.0064)  # lower = 1.0051, upper = 1.0064
+# Population-based Hazard Ratio PFS Distributions
+PFS_HR = {
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.932, 0.647, 1.365),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.932, 0.647, 1.365),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.002, 0.989, 1.018),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.283, 0.878, 1.178),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, True): (1.632, 0.905, 2.733),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.146, 1.000, 1.318),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.333, 0.995, 1.702),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.residual, False): (0.962, 0.920, 1.000),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.405, 0.924, 2.020),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.isatuximab, True): (1.883, 0.974, 3.100),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.133, 0.977, 1.296),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.345, 0.993, 1.747),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.residual, False): (0.930, 0.852, 1.001),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.736, 0.394, 1.265),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.isatuximab, True): (0.878, 0.653, 1.583),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.098, 0.877, 1.327),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.275, 0.981, 1.843),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.residual, False): (0.955, 0.822, 1.081),
+}
 
-    LATER_LINE_ISA: LogNormalHazardRate = LogNormalHazardRate("later_line_isa", 0.530,  0.803)  # lower = 0.356, upper = 0.803
-    LATER_LINE_ISA_RETREAT: LogNormalHazardRate = LogNormalHazardRate("later_line_isa_retreat", 0.765, 0.902)  # lower = 0.678, upper = 0.902
-    LATER_LINE_DARA: LogNormalHazardRate = LogNormalHazardRate("later_line_dara", 0.217, 0.231)  # lower = 0.203, upper = 0.231
-    LATER_LINE_DARA_RETREAT: LogNormalHazardRate = LogNormalHazardRate("later_line_dara_retreat", 0.609, 0.616) # lower = 0.601, upper = 0.616
-    LATER_LINE_RESIDUAL: LogNormalHazardRate = LogNormalHazardRate("later_line_residual", 1.331, 1.337) # lower = 1.324, upper = 1.337
-
-    @property
-    def name(self):
-        return 'progression_hazard_rate'
-
-    @property
-    def log_name(self):
-        return 'progression hazard rate'
-
-
-PROGRESSION_HAZARD_RATE = __ProgressionHazardRate()
-
-
-# Mortality hazard ratios
-class __MortalityHazardRate(NamedTuple):
-
-    FIRST_LINE_ISA: LogNormalHazardRate = LogNormalHazardRate("first_line_isa", 0.760, 0.895)  # LOWER = 0.645, UPPER = 0.895
-    FIRST_LINE_DARA: LogNormalHazardRate = LogNormalHazardRate("first_line_dara", 0.760, 0.895)  # LOWER = 0.645, UPPER = 0.895
-    FIRST_LINE_RESIDUAL: LogNormalHazardRate = LogNormalHazardRate("first_line_residual", 1.0024, 1.0036)  # LOWER = 1.0011, UPPER = 1.0036
-
-    LATER_LINE_ISA: LogNormalHazardRate = LogNormalHazardRate("later_line_isa", 1.116, 1.185)  # LOWER = 1.044, UPPER = 1.185
-    LATER_LINE_ISA_RETREAT: LogNormalHazardRate = LogNormalHazardRate("later_line_isa_retreat", 1.232, 1.370)  # LOWER = 1.088, UPPER = 1.370
-    LATER_LINE_DARA: LogNormalHazardRate = LogNormalHazardRate("later_line_dara", 0.572, 0.594) # LOWER = 0.551, UPPER = 0.594
-    LATER_LINE_DARA_RETREAT: LogNormalHazardRate = LogNormalHazardRate("later_line_dara_retreat", 0.786, 0.797) # LOWER = 0.776, UPPER = 0.797
-    LATER_LINE_RESIDUAL: LogNormalHazardRate = LogNormalHazardRate("later_line_residual", 1.181, 1.190)  # LOWER = 1.171, UPPER = 1.190
-
-    @property
-    def name(self):
-        return 'mortality_hazard_rate'
-
-    @property
-    def log_name(self):
-        return 'mortality hazard rate'
-
-
-MORTALITY_HAZARD_RATE = __MortalityHazardRate()
+# Population-based Hazard Ratio OS Distributions
+OS_HR = {
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.971, 0.627, 1.488),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.971, 0.627, 1.488),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.001, 0.986, 1.011),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.517, 0.939, 2.349),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, True): (2.085, 0.946, 3.634),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.225, 1.035, 1.443),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.502, 1.051, 1.944),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.residual, False): (0.941, 0.887, 0.987),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.453, 0.896, 2.407),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.isatuximab, True): (2.008, 0.975, 3.790),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.265, 1.078, 1.457),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.685, 1.231, 2.152),
+    (models.MULTIPLE_MYELOMA_3_STATE_NAME, models.TREATMENTS.residual, False): (0.865, 0.773, 0.951),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.627, 0.948, 2.628),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.isatuximab, True): (2.333, 1.031, 4.074),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.217, 0.976, 1.467),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.620, 1.008, 2.210),
+    (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.residual, False): (0.834, 0.702, 0.969),
+    (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.592, 0.103, 1.947),
+    (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.isatuximab, True): (0.914, 0.493, 2.643),
+    (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.217, 0.976, 1.467),
+    (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.427, 0.834, 2.410),
+    (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.residual, False): (0.952, 0.744, 1.145),
+}
 
 PROBABILITY_RETREAT = 0.15
