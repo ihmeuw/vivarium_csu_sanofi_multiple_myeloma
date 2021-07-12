@@ -29,12 +29,13 @@ class HazardRateTransition(RateTransition):
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: 'Builder') -> None:
         rate_data, pipeline_name = self.load_transition_rate_data(builder)
+        self.pipeline_name = pipeline_name
         self.base_rate = builder.lookup.build_table(
             rate_data,
             parameter_columns=[self.input_state.time_since_entrance_col],
         )
-        self.transition_rate = builder.value.register_rate_producer(
-            pipeline_name,
+        self.pfs_rate = builder.value.register_rate_producer(
+            f'{pipeline_name}.pfs_rate',
             source=self.compute_transition_rate,
             requires_columns=['age', 'sex', 'alive'],
             requires_values=[f'{pipeline_name}.paf'],
@@ -46,11 +47,18 @@ class HazardRateTransition(RateTransition):
             preferred_combiner=list_combiner,
             preferred_post_processor=union_post_processor,
         )
+
+        self.transition_rate = builder.value.register_value_producer(
+            f'{pipeline_name}.transition_rate',
+            source=self.pfs_rate,
+            requires_values=[f'{pipeline_name}.pfs_rate']
+        )
+
         self.population_view = builder.population.get_view(['alive'])
 
     def load_transition_rate_data(self, builder: 'Builder') -> Tuple[pd.DataFrame, str]:
         rate_data = load_hazard_rate(builder, self.input_state.state_id, "incidence")
-        pipeline_name = f'{self.input_state.state_id}_to_{self.output_state.state_id}.transition_rate'
+        pipeline_name = f'{self.input_state.state_id}_to_{self.output_state.state_id}'
         return rate_data, pipeline_name
 
 
@@ -75,6 +83,17 @@ class DiseaseStateHazard(DiseaseState):
         # noinspection PyAttributeOutsideInit
         self.hazard_rate = builder.lookup.build_table(
             hazard_rate_data, parameter_columns=[self.time_since_entrance_col])
+
+        if self.transition_set.transitions:
+            assert len(self.transition_set.transitions) == 1
+            transition = self.transition_set.transitions[0]
+            builder.value.register_value_modifier(
+                f'{transition.input_state.state_id}_to_{transition.output_state.state_id}.transition_rate',
+                self.remove_overall_survival_from_progression_free_survival)
+
+    def remove_overall_survival_from_progression_free_survival(self, index, rate):
+        os = self.excess_mortality_rate(index)
+        return rate - os
 
     def on_initialize_simulants(self, pop_data: 'SimulantData') -> None:
         super().on_initialize_simulants(pop_data)
@@ -196,7 +215,6 @@ class SusceptibleStateWithEMR(SusceptibleState):
 
 
 def MultipleMyeloma():
-    # TODO: change to disease state, call it susceptible
     susceptible = SusceptibleStateWithEMR(
         models.MULTIPLE_MYELOMA_MODEL_NAME,
         get_data_functions={
