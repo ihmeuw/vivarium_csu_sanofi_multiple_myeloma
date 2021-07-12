@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from vivarium.framework.randomness import get_hash
+
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS
 from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import OS_HR, PFS_HR, PROBABILITY_RETREAT
@@ -55,14 +57,14 @@ def make_hazard_ratios(draw: int):
 
     for key in PFS_HR:
         random_seed = '_'.join([str(k) for k in key] + [str(draw)])
-        rs = np.random.RandomState(random_seed)
+        rs = np.random.RandomState(get_hash(random_seed))
         survival_percentile = rs.random()
         pfs_hazard_ratio.loc[key] = LogNormalHazardRate(*PFS_HR[key]).get_random_variable(survival_percentile)
         os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
 
     for key in set(OS_HR).difference(PFS_HR):
         random_seed = '_'.join([str(k) for k in key] + [str(draw)])
-        rs = np.random.RandomState(random_seed)
+        rs = np.random.RandomState(get_hash(random_seed))
         survival_percentile = rs.random()
         os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
 
