@@ -22,7 +22,21 @@ TREATMENT_LINES = pd.Index(
 
 
 def make_treatment_coverage(year, scenario):
+    scalar_2019 = (2019-2016)/(2021-2016)
+    scalar_2020 = (2020-2016)/(2021-2016)
     coverages = {
+        (2016, SCENARIOS.baseline): (
+            [0.000, 0.000, 0.000, 0.000, 0.000],
+            [0.000, 0.000, 0.000, 0.000, 0.000],
+        ),
+        (2019, SCENARIOS.baseline): (
+            [0.000, 0.000, 0.000, 0.000, 0.000],
+            [0.000, 0.198 * scalar_2019, 0.323 * scalar_2019, 0.365 * scalar_2019, 0.3011 * scalar_2019],
+        ),
+        (2020, SCENARIOS.baseline): (
+            [0.000, 0.000, 0.000, 0.000, 0.000],
+            [0.000, 0.198 * scalar_2020, 0.323 * scalar_2020, 0.365 * scalar_2020, 0.3011 * scalar_2020]
+        ),
         (2021, SCENARIOS.baseline): (
             [0.000, 0.008, 0.013, 0.015, 0.009],
             [0.029, 0.198, 0.323, 0.365, 0.3011],
@@ -36,7 +50,8 @@ def make_treatment_coverage(year, scenario):
             [0.34, 0.34, 0.34, 0.34, 0.34],
         )
     }
-    coverages[(2021, SCENARIOS.alternative)] = coverages[(2021, SCENARIOS.baseline)]
+    for year in (2016, 2019, 2020, 2021):
+        coverages[(year, SCENARIOS.alternative)] = coverages[(year, SCENARIOS.baseline)]
 
     coverage_data = coverages[(year, scenario)]
     coverage = pd.DataFrame({
@@ -97,12 +112,13 @@ class MultipleMyelomaTreatmentCoverage:
 
         scenario = builder.configuration.mm_treatment_scenario
         assert scenario in SCENARIOS
-        self.coverage_2021 = make_treatment_coverage(2021, scenario)
-        self.coverage_2025 = make_treatment_coverage(2025, scenario)
+        self.coverage = {}
+        for year in (2016, 2019, 2020, 2021, 2025):
+            self.coverage[year] = make_treatment_coverage(year, scenario)
 
         # What treatment are they currently on.
         self.treatment_column = 'multiple_myeloma_treatment'
-        # Did they previously recieve isatuximab or daratumumab
+        # Did they previously receive isatuximab or daratumumab
         self.retreatment_eligible_column = 'retreatment_eligible'
         self.retreated_column = 'retreated'
         columns_created = [
@@ -233,15 +249,27 @@ class MultipleMyelomaTreatmentCoverage:
     def get_current_coverage(self, time: pd.Timestamp) -> pd.DataFrame:
         """Get a df with columns: [TREATMENTS.isatuximab, TREATMENTS.daratumumab, TREATMENTS.residual]
         indexed by multiple myeloma state."""
-        if time.year < 2021:
-            return self.coverage_2021
+        if time.year < 2016:
+            return self.coverage[2016]
+        elif time.year < 2019:
+            upper_year = 2019
+            lower_year = 2016
+        elif time.year < 2020:
+            upper_year = 2020
+            lower_year = 2019
+        elif time.year < 2021:
+            upper_year = 2021
+            lower_year = 2020
+        elif time.year < 2025:
+            upper_year = 2025
+            lower_year = 2021
         elif time.year > 2025:
-            return self.coverage_2025
-        t = (time - pd.Timestamp('2021-01-01')) / (pd.Timestamp('2026-01-01') - pd.Timestamp('2021-01-01'))
+            return self.coverage[2025]
+        t = (time - pd.Timestamp(f'{lower_year}-01-01')) / (pd.Timestamp(f'{upper_year}-01-01') - pd.Timestamp(f'{lower_year}-01-01'))
 
         treatments = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab]
-        slope = self.coverage_2025[treatments] - self.coverage_2021[treatments]
-        coverage = self.coverage_2021[treatments] + slope * t
+        slope = self.coverage[upper_year][treatments] - self.coverage[lower_year][treatments]
+        coverage = self.coverage[lower_year][treatments] + slope * t
         coverage[models.TREATMENTS.residual] = 1 - coverage.sum(axis=1)
         return coverage
 
