@@ -1,5 +1,3 @@
-from typing import NamedTuple
-
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 
 

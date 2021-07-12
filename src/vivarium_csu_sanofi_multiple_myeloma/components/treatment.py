@@ -5,7 +5,7 @@ import pandas as pd
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS
-from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (OS_HR, PFS_HR, PROBABILITY_RETREAT)
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import OS_HR, PFS_HR, PROBABILITY_RETREAT
 from vivarium_csu_sanofi_multiple_myeloma.utilities import LogNormalHazardRate
 
 if TYPE_CHECKING:
@@ -284,4 +284,3 @@ class MultipleMyelomaTreatmentEffect:
 
     def scale_progression_hazard(self, index: pd.Index, progression_hazard: pd.Series):
         return progression_hazard * self.progression_hazard_ratio(index)
-

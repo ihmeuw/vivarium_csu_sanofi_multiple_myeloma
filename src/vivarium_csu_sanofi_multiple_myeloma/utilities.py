@@ -7,7 +7,6 @@ from pathlib import Path
 from loguru import logger
 from scipy.stats import norm, lognorm
 
-from vivarium.framework.randomness import get_hash
 from vivarium_public_health.risks.data_transformations import pivot_categorical
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import metadata
@@ -85,12 +84,12 @@ class LogNormalHazardRate:
     """Defines an instance of a lognormal hazard rate normal distribution.
     Parameters
     ----------
-    name
-        string describing the distribution, used in seed creation
     hr
         mean of distribution
+    hr_lower
+        lower bound the lognormal distribution
     hr_upper
-        upper bound of truncnorm distribution
+        upper bound of lognormal distribution
     Returns
     -------
         An object with parameters for scipy.stats.lognorm
