@@ -1,6 +1,6 @@
 import itertools
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import models
+from vivarium_csu_sanofi_multiple_myeloma.constants import models, data_values
 
 #################################
 # Results columns and variables #
@@ -31,8 +31,8 @@ YLDS_COLUMN_TEMPLATE = 'ylds_due_to_{CAUSE_OF_DISABILITY}_in_{YEAR}_among_{SEX}_
 STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
 TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
-SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}'
-SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}'
+SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
+SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
 
 COLUMN_TEMPLATES = {
     'population': TOTAL_POPULATION_COLUMN_TEMPLATE,
@@ -111,6 +111,10 @@ TEMPLATE_FIELD_MAP = {
     # CAUTION: This needs to change with the time step size.
     'LEFT_PERIOD': ALL_PERIODS[:-1],
     'RIGHT_PERIOD': ALL_PERIODS[1:],
+    'SEX_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.sex_at_diagnosis],
+    'AGE_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.age_at_diagnosis],
+    'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
+    'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis],
 }
 
 

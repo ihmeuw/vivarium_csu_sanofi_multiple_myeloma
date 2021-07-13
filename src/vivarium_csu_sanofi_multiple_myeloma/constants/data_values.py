@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 
 
@@ -51,3 +53,86 @@ OS_HR = {
 }
 
 PROBABILITY_RETREAT = 0.15
+
+
+class __Risks(NamedTuple):
+    sex_at_diagnosis: str
+    age_at_diagnosis: str
+    race_and_cytogenetic_risk_at_diagnosis: str
+    renal_function_at_diagnosis: str
+
+
+RISKS = __Risks(*__Risks._fields)
+
+
+class __RiskExposureLevels(NamedTuple):
+    Male: str
+    Female: str
+    over_65: str
+    under_65: str
+    high_cytogenetic_risk_and_black: str
+    high_cytogenetic_risk_and_non_black: str
+    low_cytogenetic_risk_and_black: str
+    low_cytogenetic_risk_and_non_black: str
+    renal_impaired: str
+    renal_unimpaired: str
+
+
+RISK_EXPOSURE_LEVELS = __RiskExposureLevels(*__RiskExposureLevels._fields)
+
+RISK_LEVEL_MAP = {
+    RISKS.sex_at_diagnosis: [RISK_EXPOSURE_LEVELS.Male, RISK_EXPOSURE_LEVELS.Female],
+    RISKS.age_at_diagnosis: [RISK_EXPOSURE_LEVELS.over_65, RISK_EXPOSURE_LEVELS.under_65],
+    RISKS.race_and_cytogenetic_risk_at_diagnosis: [RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black,
+                                                   RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black,
+                                                   RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black,
+                                                   RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black],
+    RISKS.renal_function_at_diagnosis: [RISK_EXPOSURE_LEVELS.renal_impaired, RISK_EXPOSURE_LEVELS.renal_unimpaired]
+}
+
+UNDIAGNOSED = 'undiagnosed'
+
+# Risk Exposure Distributions for Risk Effects Calculation
+SEX_RISK_EXPOSURE = 0.539  # exposed: male
+AGE_RISK_EXPOSURE = 0.647  # exposed: 65+
+RACE_RISK_EXPOSURE = 0.177  # exposed: black
+CYTOGENETIC_RISK_EXPOSURE = 0.872  # exposed: high
+RENAL_RISK_EXPOSURE = 0.081  # exposed: impaired
+
+RACE_AND_CYTO_EXPOSURES = {
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: RACE_RISK_EXPOSURE * CYTOGENETIC_RISK_EXPOSURE,
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1 - RACE_RISK_EXPOSURE) * CYTOGENETIC_RISK_EXPOSURE,
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: RACE_RISK_EXPOSURE * (1 - CYTOGENETIC_RISK_EXPOSURE),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (1 - RACE_RISK_EXPOSURE) * (1 - CYTOGENETIC_RISK_EXPOSURE)
+}
+
+RENAL_RISK_EXPOSURE = {
+    RISK_EXPOSURE_LEVELS.renal_impaired: RENAL_RISK_EXPOSURE,
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (1 - RENAL_RISK_EXPOSURE)
+}
+
+RISK_PFS_HR = {
+    RISK_EXPOSURE_LEVELS.Male: (1.3, 1.04, 1.6),
+    RISK_EXPOSURE_LEVELS.Female: 1.0,
+    RISK_EXPOSURE_LEVELS.over_65: (1.7, 1.4, 2.1),
+    RISK_EXPOSURE_LEVELS.under_65: 1.0,
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.4, 1.1, 1.8),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.3, 1.0, 1.6),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.4, 1.1, 1.8),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: 1.0,
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.4, 1.1, 1.7),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: 1.0
+}
+
+RISK_OS_HR = {
+    RISK_EXPOSURE_LEVELS.Male: (1.8, 1.3, 2.5),
+    RISK_EXPOSURE_LEVELS.Female: 1.0,
+    RISK_EXPOSURE_LEVELS.over_65: (2.2, 1.6, 3.0),
+    RISK_EXPOSURE_LEVELS.under_65: 1.0,
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.7, 1.2, 2.4),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.8, 1.3, 2.7),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.7, 1.2, 2.4),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: 1.0,
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.9, 1.4, 2.6),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: 1.0
+}
