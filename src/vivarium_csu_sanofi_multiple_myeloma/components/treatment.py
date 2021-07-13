@@ -169,12 +169,6 @@ class MultipleMyelomaTreatmentCoverage:
             p_isa = coverage.at[current_line, models.TREATMENTS.isatuximab]
             p_dara = coverage.at[current_line, models.TREATMENTS.daratumumab]
             p_resid = coverage.at[current_line, models.TREATMENTS.residual]
-            # if previous_line:
-            #     p_isa_p = coverage.at[previous_line, models.TREATMENTS.isatuximab]
-            #     p_dara_p = coverage.at[previous_line, models.TREATMENTS.daratumumab]
-            #     p_resid_p = coverage.at[previous_line, models.TREATMENTS.residual]
-            # else:
-            #     p_isa_p, p_dara_p, p_resid_p = 0., 0., 1.
 
             # Our base filter, which we'll partition.
             new_treatment_line = pop[f'{current_line}_event_time'] == event.time
@@ -208,51 +202,22 @@ class MultipleMyelomaTreatmentCoverage:
             # Second group, simulants w/prior exposure to isa/dara, and will be retreated this line
             retreat = new_treatment_line & ever_isa_or_dara & retreat_mask
             retreat_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab]
-            retreat_probs = [p_isa_c / (p_isa_c + p_dara_c), p_dara_c / (p_isa_c + p_dara_c)]
+            retreat_probs = [p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)]
 
             pop.loc[retreat, self.treatment_column] = self.randomness.choice(
                 pop.loc[retreat].index,
                 choices=retreat_choices,
                 p=retreat_probs,
             )
-            pop.loc[retreat, self.ever_isa_or_dara_column] = 'true'  # This is a no-op.  Here for clarity.
+            pop.loc[retreat, self.ever_isa_or_dara_column] = True  # This is a no-op.  Here for clarity.
             pop.loc[retreat, self.retreated_column] = True
 
-            # Second group, got 1 dose of isa/dara, but can't receive again.
-            no_retreat = (
-                (new_treatment_line & ever_isa_or_dara & ~retreat_mask)
-                | (new_treatment_line & retreatment_ineligible)
-            )
+            # Third group, got 1 dose of isa/dara, but won't receive one this line, may receive again
+            no_retreat = new_treatment_line & ever_isa_or_dara & ~retreat_mask
 
             pop.loc[no_retreat, self.treatment_column] = models.TREATMENTS.residual
-            pop.loc[no_retreat, self.ever_isa_or_dara_column] = 'false'
-            pop.loc[no_retreat, self.retreated_column] = False  # This is a no-op.  Here for clarity.
-
-            # Third group, getting their first dose of isa/dara and determining if they can be retreated.
-            unknown_retreat = new_treatment_line & retreatment_unknown
-            unknown_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab, models.TREATMENTS.residual]
-            # TODO: add a link to the docs when they're live for this algorithm.
-            old_to_new_scale = (p_isa_p + p_dara_p) / (p_isa_c + p_dara_c)
-            final_scale = (1 - PROBABILITY_RETREAT * old_to_new_scale) / p_resid_p
-            p_isa = p_isa_c * final_scale
-            p_dara = p_dara_c * final_scale
-            if p_isa + p_dara > 1:
-                p_isa, p_dara = p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)
-            p_resid = 1 - p_isa - p_dara
-            unknown_treatment_probs = [p_isa, p_dara, p_resid]
-
-            pop.loc[unknown_retreat, self.treatment_column] = self.randomness.choice(
-                pop.loc[unknown_retreat].index,
-                choices=unknown_choices,
-                p=unknown_treatment_probs,
-            )
-            isa_or_dara = pop[self.treatment_column].isin([
-                models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab
-            ])
-            pop.loc[unknown_retreat & isa_or_dara, self.ever_isa_or_dara_column] = 'true'
-            # These are no-ops.  Here for clarity.
-            pop.loc[unknown_retreat & ~isa_or_dara, self.ever_isa_or_dara_column] = 'unknown'
-            pop.loc[unknown_retreat, self.retreated_column] = False
+            # pop.loc[no_retreat, ever_isa_or_dara] does not change
+            # pop.loc[no_retreat, retreated] does not change
 
         self.population_view.update(pop)
 
