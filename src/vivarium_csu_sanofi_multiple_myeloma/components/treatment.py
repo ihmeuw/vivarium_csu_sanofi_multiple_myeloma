@@ -38,15 +38,15 @@ def make_treatment_coverage(year, scenario):
             [0.000, 0.198 * scalar_2020, 0.323 * scalar_2020, 0.365 * scalar_2020, 0.3011 * scalar_2020]
         ),
         (2021, SCENARIOS.baseline): (
-            [0.000, 0.008, 0.013, 0.015, 0.009],
+            [0.000, 0.005, 0.010, 0.033, 0.033],
             [0.029, 0.198, 0.323, 0.365, 0.3011],
         ),
         (2025, SCENARIOS.baseline): (
-            [0.000, 0.100, 0.100, 0.100, 0.100],
+            [0.000, 0.100, 0.090, 0.070, 0.070],
             [0.34, 0.34, 0.34, 0.34, 0.34],
         ),
         (2025, SCENARIOS.alternative): (
-            [0.100, 0.100, 0.100, 0.100, 0.100],
+            [0.100, 0.100, 0.090, 0.070, 0.070],
             [0.34, 0.34, 0.34, 0.34, 0.34],
         )
     }
@@ -263,7 +263,7 @@ class MultipleMyelomaTreatmentCoverage:
         elif time.year < 2025:
             upper_year = 2025
             lower_year = 2021
-        elif time.year > 2025:
+        elif time.year >= 2025:
             return self.coverage[2025]
         t = (time - pd.Timestamp(f'{lower_year}-01-01')) / (pd.Timestamp(f'{upper_year}-01-01') - pd.Timestamp(f'{lower_year}-01-01'))
 
@@ -304,7 +304,7 @@ class MultipleMyelomaTreatmentEffect:
 
             if next_state:
                 builder.value.register_value_modifier(
-                    f'{state}_to_{next_state}.transition_rate',
+                    f'{state}_to_{next_state}.pfs_rate',
                     modifier=self.scale_progression_hazard,
                     requires_columns=required_columns,
                 )
