@@ -219,6 +219,11 @@ class MultipleMyelomaTreatmentCoverage:
             # pop.loc[no_retreat, ever_isa_or_dara] does not change
             # pop.loc[no_retreat, retreated] does not change
 
+            #XXX sanity
+            mm_1_mask = pop[models.MULTIPLE_MYELOMA_MODEL_NAME] == models.MULTIPLE_MYELOMA_1_STATE_NAME
+            retreat_true = pop[self.retreated_column]
+            assert (pop[mm_1_mask & retreat_true]).empty
+
         self.population_view.update(pop)
 
     def get_current_coverage(self, time: pd.Timestamp) -> pd.DataFrame:
