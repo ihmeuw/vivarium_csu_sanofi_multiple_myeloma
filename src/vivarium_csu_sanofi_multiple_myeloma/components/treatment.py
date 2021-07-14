@@ -51,8 +51,8 @@ def make_treatment_coverage(year, scenario):
             [0.34, 0.34, 0.34, 0.34, 0.34],
         )
     }
-    for year in (2016, 2019, 2020, 2021):
-        coverages[(year, SCENARIOS.alternative)] = coverages[(year, SCENARIOS.baseline)]
+    for target_year in (2016, 2019, 2020, 2021):
+        coverages[(target_year, SCENARIOS.alternative)] = coverages[(target_year, SCENARIOS.baseline)]
 
     coverage_data = coverages[(year, scenario)]
     coverage = pd.DataFrame({
