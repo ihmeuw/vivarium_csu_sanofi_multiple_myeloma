@@ -35,7 +35,7 @@ def make_measure_data(data):
         transition_count=get_transition_count_measure_data(data, 'transition_count', stratified_by_treatment=True),
         treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
         survival=get_survival_measure_data(data),
-        registry=get_registry_measure_data(data)
+        registry=get_registry_measure_data(data),
     )
     return measure_data
 
@@ -50,6 +50,7 @@ class MeasureData(NamedTuple):
     transition_count: pd.DataFrame
     treatment_count: pd.DataFrame
     survival: pd.DataFrame
+    registry: pd.DataFrame
 
     def dump(self, output_dir: Path):
         for key, df in self._asdict().items():
