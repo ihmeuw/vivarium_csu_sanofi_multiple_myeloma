@@ -117,7 +117,7 @@ TEMPLATE_FIELD_MAP = {
     'AGE_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.age_at_diagnosis],
     'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
     'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis],
-    'REGISTRY_STATUS': ['newly_eligible', 'newly_enrolled', 'enrolled', 'enrolled_person_time']
+    'REGISTRY_STATUS': ['newly_eligible', 'newly_enrolled', 'enrolled']
 }
 
 
