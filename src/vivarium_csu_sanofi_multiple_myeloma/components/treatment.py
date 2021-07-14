@@ -159,7 +159,7 @@ class MultipleMyelomaTreatmentCoverage:
         pop = self.population_view.get(event.index)
 
         retreat_mask = self.randomness.get_draw(pop.index, additional_key='retreat') < PROBABILITY_RETREAT
-        ever_isa_or_dara = pop[self.ever_isa_or_dara_column]
+        ever_isa_or_dara = pop[self.ever_isa_or_dara_column].copy()
 
         proportion_ever_isa_or_dara = 0
         coverage = self.get_current_coverage(event.time)
@@ -218,11 +218,6 @@ class MultipleMyelomaTreatmentCoverage:
             pop.loc[no_retreat, self.treatment_column] = models.TREATMENTS.residual
             # pop.loc[no_retreat, ever_isa_or_dara] does not change
             # pop.loc[no_retreat, retreated] does not change
-
-            #XXX sanity
-            mm_1_mask = pop[models.MULTIPLE_MYELOMA_MODEL_NAME] == models.MULTIPLE_MYELOMA_1_STATE_NAME
-            retreat_true = pop[self.retreated_column]
-            assert (pop[mm_1_mask & retreat_true]).empty
 
         self.population_view.update(pop)
 
