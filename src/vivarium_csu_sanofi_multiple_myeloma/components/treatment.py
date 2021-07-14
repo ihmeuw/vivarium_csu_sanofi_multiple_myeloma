@@ -238,7 +238,8 @@ class MultipleMyelomaTreatmentCoverage:
             # pop.loc[no_retreat, retreated] does not change
 
             # Build registry mask
-            registry_eligible = registry_eligible | (~ever_isa & isa)
+            if self.registry_start_date >= event.time:
+                registry_eligible = registry_eligible | (~ever_isa & isa)
 
         pop.loc[registry_eligible & registry_mask, self.registry_evaluation_status] = 'enrolled'
         pop.loc[registry_eligible, self.registry_evaluation_date] = event.time
