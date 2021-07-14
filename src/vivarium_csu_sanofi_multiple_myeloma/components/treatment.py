@@ -191,9 +191,13 @@ class MultipleMyelomaTreatmentCoverage:
             # First group, never had isa/dara
             naive = new_treatment_line & ~ever_isa_or_dara
             naive_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab, models.TREATMENTS.residual]
-            rescale_probabilities = lambda p1, p2, e: (p1 - e * PROBABILITY_RETREAT * p1/(p1 + p2))/ (1 - e)
-            p_isa_naive = rescale_probabilities(p_isa, p_dara, proportion_ever_isa_or_dara)
-            p_dara_naive = rescale_probabilities(p_dara, p_isa, proportion_ever_isa_or_dara)
+            rescale_probabilities = lambda p1, p2, e: (p1 - e * PROBABILITY_RETREAT * p1 / (p1 + p2)) / (1 - e)
+            if p_isa + p_dara:
+                p_isa_naive = rescale_probabilities(p_isa, p_dara, proportion_ever_isa_or_dara)
+                p_dara_naive = rescale_probabilities(p_dara, p_isa, proportion_ever_isa_or_dara)
+            else:
+                p_isa_naive = p_isa
+                p_dara_naive = p_dara
             if p_isa_naive + p_dara_naive > 1:
                 p_isa_naive = p_isa_naive / (p_isa_naive + p_dara_naive)
                 p_dara_naive = p_dara_naive / (p_isa_naive + p_dara_naive)
