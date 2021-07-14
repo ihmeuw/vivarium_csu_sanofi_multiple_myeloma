@@ -9,12 +9,11 @@ from vivarium.framework.event import Event
 from vivarium.framework.population import SimulantData
 
 from vivarium_public_health.metrics import MortalityObserver as MortalityObserver_, DiseaseObserver as DiseaseObserver_
-from vivarium_public_health.metrics.utilities import (get_deaths, get_person_time, get_state_person_time,
-                                                      get_transition_count,
-                                                      get_years_lived_with_disability, get_years_of_life_lost,
-                                                      TransitionString)
+from vivarium_public_health.metrics.utilities import (get_age_bins, get_deaths, get_person_time, get_state_person_time,
+                                                      get_transition_count, get_group_counts, get_output_template,
+                                                      get_years_of_life_lost, TransitionString)
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import data_values, models, results
+from vivarium_csu_sanofi_multiple_myeloma.constants import data_values, models, results, data_keys
 
 
 class ResultsStratifier:
@@ -435,3 +434,86 @@ class DiseaseObserver(DiseaseObserver_):
 
     def __repr__(self) -> str:
         return f"DiseaseObserver({self.disease})"
+
+
+class RegistryObserver:
+    @property
+    def name(self):
+        return self.__class__.__name__
+
+    # noinspection PyAttributeOutsideInit
+    def setup(self, builder):
+        self.clock = builder.time.clock()
+        self.age_bins = get_age_bins(builder)
+
+        required_columns = [
+            'registry_evaluation_status',
+            'registry_evaluation_date',
+            'age',
+            'sex',
+            'alive',
+            *data_values.RISKS
+        ]
+
+        self.population_view = builder.population.get_view(required_columns)
+
+        builder.value.register_value_modifier('metrics', self.metrics)
+        builder.event.register_listener('collect_metrics', self.on_collect_metrics)
+
+        self.registry_entrances = Counter()
+        self.registry_prevalence = Counter()
+
+    def on_collect_metrics(self, event: Event):
+        # count by stratification groups
+        pop = self.population_view.get(event.index)
+        self.registry_entrances.update(get_entrances(pop, self.age_bins, event.time, 'eligible'))
+        self.registry_entrances.update(get_entrances(pop, self.age_bins, event.time, 'enrolled'))
+        self.registry_prevalence.update(get_registry_population(pop, self.age_bins, event.time, event.step_size.days/365))
+
+    def metrics(self, index, metrics):
+        metrics.update(self.registry_entrances)
+        metrics.update(self.registry_prevalence)
+        return metrics
+
+def get_entrances(pop: pd.DataFrame, age_bins: pd.DataFrame, event_time: pd.Timestamp,
+                  evaluation_status: str) -> Dict[str, int]:
+
+    mask = ((pop.alive == 'alive') & (pop.registry_evaluation_date == event_time)
+            & (pop.registry_evaluation_status == evaluation_status))
+    config = {'by_age': True, 'by_sex': True, 'by_year': True}
+    result = {}
+    risk_template = '_'.join([f'{s.upper()}_{{}}' for s in [
+        data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis, data_values.RISKS.renal_function_at_diagnosis]])
+
+    for rcr, rf in itertools.product(data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
+                                            data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis]):
+        risk_level_mask = ((pop[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis] == rcr)
+                           & (pop[data_values.RISKS.renal_function_at_diagnosis] == rf) & mask)
+        risk_level_pop = pop.loc[risk_level_mask]
+        base_key = get_output_template(**config).substitute(measure=f'registry_status_newly_{evaluation_status}', year=event_time.year)
+        group_counts = get_group_counts(risk_level_pop, "", base_key, config, age_bins)
+        group_counts = {key + '_' + risk_template.format(rcr, rf): value for key, value in group_counts.items()}
+        result.update(group_counts)
+
+    return result
+
+
+def get_registry_population(pop: pd.DataFrame, age_bins: pd.DataFrame, event_time: pd.Timestamp, scale: float) -> Dict[str, int]:
+    mask = (pop.alive == 'alive') & (pop.registry_evaluation_status == 'enrolled')
+    config = {'by_age': True, 'by_sex': True, 'by_year': True}
+    result = {}
+    risk_template = '_'.join([f'{s.upper()}_{{}}' for s in [
+        data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis, data_values.RISKS.renal_function_at_diagnosis]])
+    for rcr, rf in itertools.product(
+            data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
+            data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis]):
+        risk_level_mask = ((pop[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis] == rcr)
+                           & (pop[data_values.RISKS.renal_function_at_diagnosis] == rf) & mask)
+        risk_level_pop = pop.loc[risk_level_mask]
+        measure = 'registry_status_enrolled'
+        base_key = get_output_template(**config).substitute(measure=measure, year=event_time.year)
+        group_counts = get_group_counts(risk_level_pop, "", base_key, config, age_bins, lambda x: len(x)*scale)
+        group_counts = {key + '_' + risk_template.format(rcr, rf): value for key, value in group_counts.items()}
+        result.update(group_counts)
+
+    return result

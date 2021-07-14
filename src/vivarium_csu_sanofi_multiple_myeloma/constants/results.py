@@ -33,6 +33,7 @@ TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SE
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
 SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
 SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
+REGISTRY_TEMPLATE = 'registry_status_{REGISTRY_STATUS}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_RENAL_FUNCTION_AT_DIAGNOSIS_{RENAL_FUNCTION_AT_DIAGNOSIS}'
 
 COLUMN_TEMPLATES = {
     'population': TOTAL_POPULATION_COLUMN_TEMPLATE,
@@ -45,6 +46,7 @@ COLUMN_TEMPLATES = {
     'treatment_count': TREATMENT_COUNT_COLUMN_TEMPLATE,
     'survival_alive': SURVIVAL_ALIVE_TEMPLATE,
     'survival_other': SURVIVAL_OTHER_TEMPLATE,
+    'registry_status': REGISTRY_TEMPLATE
 }
 
 NON_COUNT_TEMPLATES = [
@@ -115,6 +117,7 @@ TEMPLATE_FIELD_MAP = {
     'AGE_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.age_at_diagnosis],
     'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
     'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis],
+    'REGISTRY_STATUS': ['newly_eligible', 'newly_enrolled', 'enrolled', 'enrolled_person_time']
 }
 
 

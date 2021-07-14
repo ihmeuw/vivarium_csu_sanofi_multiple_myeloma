@@ -10,5 +10,6 @@ from vivarium_csu_sanofi_multiple_myeloma.components.observers import (
     MortalityObserver,
     MultipleMyelomaTreatmentObserver,
     SurvivalObserver,
+    RegistryObserver
 )
 from vivarium_csu_sanofi_multiple_myeloma.components.risk_effect import MultipleMyelomaRiskEffects

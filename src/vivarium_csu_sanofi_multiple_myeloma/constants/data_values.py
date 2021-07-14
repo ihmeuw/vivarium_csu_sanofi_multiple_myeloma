@@ -58,6 +58,7 @@ OS_HR = {
 }
 
 PROBABILITY_RETREAT = 0.15
+REGISTRY_ENROLL_PROBABILITY = 0.05
 
 
 class __Risks(NamedTuple):
