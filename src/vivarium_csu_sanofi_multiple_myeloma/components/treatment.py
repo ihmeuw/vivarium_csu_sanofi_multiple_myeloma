@@ -7,7 +7,8 @@ from vivarium.framework.randomness import get_hash
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS
-from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import OS_HR, PFS_HR, PROBABILITY_RETREAT
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (OS_HR, PFS_HR, PROBABILITY_RETREAT,
+                                                                        REGISTRY_ENROLL_PROBABILITY)
 from vivarium_csu_sanofi_multiple_myeloma.utilities import LogNormalHazardRate
 
 if TYPE_CHECKING:
@@ -121,10 +122,17 @@ class MultipleMyelomaTreatmentCoverage:
         # Did they previously receive isatuximab or daratumumab
         self.ever_isa_or_dara_column = 'ever_isa_or_dara'
         self.retreated_column = 'retreated'
+        self.registry_evaluation_status = 'registry_evaluation_status'  # 4 potential values: unevaluated, eligible, enrolled
+        self.registry_evaluation_date = 'registry_evaluation_date'
+        self.ever_isa = 'ever_isa'
+        self.registry_start_date = pd.Timestamp('2021-01-01')
         columns_created = [
             self.treatment_column,
             self.ever_isa_or_dara_column,
-            self.retreated_column
+            self.retreated_column,
+            self.registry_evaluation_status,
+            self.registry_evaluation_date,
+            self.ever_isa
         ]
         columns_required = (
             [models.MULTIPLE_MYELOMA_MODEL_NAME]
@@ -146,7 +154,10 @@ class MultipleMyelomaTreatmentCoverage:
         pop_update = pd.DataFrame({
             self.treatment_column: models.TREATMENTS.not_treated,
             self.ever_isa_or_dara_column: False,
-            self.retreated_column: False
+            self.retreated_column: False,
+            self.registry_evaluation_status: 'unevaluated',
+            self.registry_evaluation_date: pd.NaT,
+            self.ever_isa: False
         }, index=pop_data.index)
         with_mm = initial_mm_state.loc[
             initial_mm_state[models.MULTIPLE_MYELOMA_MODEL_NAME] != models.SUSCEPTIBLE_STATE_NAME,
@@ -160,10 +171,14 @@ class MultipleMyelomaTreatmentCoverage:
 
         retreat_mask = self.randomness.get_draw(pop.index, additional_key='retreat') < PROBABILITY_RETREAT
         ever_isa_or_dara = pop[self.ever_isa_or_dara_column].copy()
+        ever_isa = pop[self.ever_isa].copy()
+        registry_eligible = pd.Series(False, index=pop.index)
+        registry_mask = self.randomness.get_draw(pop.index, additional_key='registry') < REGISTRY_ENROLL_PROBABILITY
 
         proportion_ever_isa_or_dara = 0
         coverage = self.get_current_coverage(event.time)
         lines = TREATMENT_LINES.tolist()
+
         for current_line, previous_line in zip(lines, [None] + lines[:-1]):
             # First, unpack probabilities for the current and previous line.
             p_isa = coverage.at[current_line, models.TREATMENTS.isatuximab]
@@ -192,7 +207,10 @@ class MultipleMyelomaTreatmentCoverage:
             isa_or_dara = pop[self.treatment_column].isin([
                 models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab
             ])
+            isa = pop[self.treatment_column] == models.TREATMENTS.isatuximab
+            pop.loc[naive & isa, self.ever_isa] = True
             pop.loc[naive & isa_or_dara, self.ever_isa_or_dara_column] = True
+
             # These are no-ops.  Here for clarity.
             pop.loc[naive & ~isa_or_dara, self.ever_isa_or_dara_column] = False
             pop.loc[naive, self.retreated_column] = False
@@ -219,6 +237,12 @@ class MultipleMyelomaTreatmentCoverage:
             # pop.loc[no_retreat, ever_isa_or_dara] does not change
             # pop.loc[no_retreat, retreated] does not change
 
+            # Build registry mask
+            registry_eligible = registry_eligible | (~ever_isa & isa)
+
+        pop.loc[registry_eligible & registry_mask, self.registry_evaluation_status] = 'enrolled'
+        pop.loc[registry_eligible, self.registry_evaluation_date] = event.time
+        pop.loc[registry_eligible & ~registry_mask, self.registry_evaluation_status] = 'eligible'
         self.population_view.update(pop)
 
     def get_current_coverage(self, time: pd.Timestamp) -> pd.DataFrame:
