@@ -31,8 +31,8 @@ YLDS_COLUMN_TEMPLATE = 'ylds_due_to_{CAUSE_OF_DISABILITY}_in_{YEAR}_among_{SEX}_
 STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
 TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
-SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
-SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
+SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s.upper()}}}' for s in data_values.RISKS])
+SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s.upper()}}}' for s in data_values.RISKS])
 REGISTRY_TEMPLATE = 'registry_status_{REGISTRY_STATUS}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_RENAL_FUNCTION_AT_DIAGNOSIS_{RENAL_FUNCTION_AT_DIAGNOSIS}'
 
 COLUMN_TEMPLATES = {

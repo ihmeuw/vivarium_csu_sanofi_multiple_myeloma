@@ -35,6 +35,7 @@ def make_measure_data(data):
         transition_count=get_transition_count_measure_data(data, 'transition_count', stratified_by_treatment=True),
         treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
         survival=get_survival_measure_data(data),
+        registry=get_registry_measure_data(data)
     )
     return measure_data
 
@@ -184,5 +185,17 @@ def get_survival_measure_data(data):
     data['measure'], data['process'] = data.process.str.split('_period_').str
     data['period'], data['treatment_line'] = data.process.str.split('_line_').str
 
+    data = data.drop(columns='process')
+    return sort_data(data)
+
+
+def get_registry_measure_data(data):
+    data = pivot_data(data[results.RESULT_COLUMNS('registry_status') + GROUPBY_COLUMNS])
+    data['process'], data['RENAL_FUNCTION_AT_DIAGNOSIS'] = data.process.str.split('_RENAL_FUNCTION_AT_DIAGNOSIS_').str
+    data['process'], data['RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS'] = data.process.str.split('_RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_').str
+    data['process'], data['age'] = data.process.str.split('_in_age_group_').str
+    data['process'], data['sex'] = data.process.str.split('_among_').str
+    data['year'] = data.process.str.split('_in_').str[-1]
+    data['measure'] = data.process.str.split('_in_').str[:-1].apply(lambda x: '_in_'.join(x))
     data = data.drop(columns='process')
     return sort_data(data)
