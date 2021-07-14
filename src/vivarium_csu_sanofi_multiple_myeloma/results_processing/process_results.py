@@ -173,8 +173,9 @@ def get_transition_count_measure_data(data, measure, stratified_by_treatment):
 
 def get_treatment_count_measure_data(data, measure):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
-    data['treatment'], data['year'] = data.process.str.split('_year_').str
-    data['treatment_line'], data['process'] = data.process.str.split('_treatment_').str
+    data['process'], data['year'] = data.process.str.split('_year_').str
+    data['process'], data['treatment'] = data.process.str.split('_treatment_').str
+    data['process'], data['treatment_line'] = data.process.str.split('line_').str
     data = data.drop(columns='process')
     return sort_data(data)
 
@@ -182,7 +183,7 @@ def get_treatment_count_measure_data(data, measure):
 def get_survival_measure_data(data):
     data = pivot_data(data[results.RESULT_COLUMNS('survival_alive') + results.RESULT_COLUMNS('survival_other') + GROUPBY_COLUMNS])
     for s in reversed(RISKS):
-        data['process'], data[s] = data.process.str.split(s.upper()).str
+        data['process'], data[s] = data.process.str.split('_' + s.upper() + '_').str
     data['measure'], data['process'] = data.process.str.split('_period_').str
     data['period'], data['treatment_line'] = data.process.str.split('_line_').str
 
