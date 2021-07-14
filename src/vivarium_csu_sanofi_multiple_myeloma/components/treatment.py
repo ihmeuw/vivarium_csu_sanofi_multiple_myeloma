@@ -224,7 +224,10 @@ class MultipleMyelomaTreatmentCoverage:
             # Second group, simulants w/prior exposure to isa/dara, and will be retreated this line
             retreat = new_treatment_line & ever_isa_or_dara & retreat_mask
             retreat_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab]
-            retreat_probs = [p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)]
+            if p_isa + p_dara:
+                retreat_probs = [p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)]
+            else:
+                retreat_probs = [p_isa, p_dara]
 
             pop.loc[retreat, self.treatment_column] = self.randomness.choice(
                 pop.loc[retreat].index,
