@@ -51,8 +51,8 @@ def make_treatment_coverage(year, scenario):
             [0.34, 0.34, 0.34, 0.34, 0.34],
         )
     }
-    for year in (2016, 2019, 2020, 2021):
-        coverages[(year, SCENARIOS.alternative)] = coverages[(year, SCENARIOS.baseline)]
+    for target_year in (2016, 2019, 2020, 2021):
+        coverages[(target_year, SCENARIOS.alternative)] = coverages[(target_year, SCENARIOS.baseline)]
 
     coverage_data = coverages[(year, scenario)]
     coverage = pd.DataFrame({
@@ -191,9 +191,13 @@ class MultipleMyelomaTreatmentCoverage:
             # First group, never had isa/dara
             naive = new_treatment_line & ~ever_isa_or_dara
             naive_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab, models.TREATMENTS.residual]
-            rescale_probabilities = lambda p1, p2, e: (p1 - e * PROBABILITY_RETREAT * p1/(p1 + p2))/ (1 - e)
-            p_isa_naive = rescale_probabilities(p_isa, p_dara, proportion_ever_isa_or_dara)
-            p_dara_naive = rescale_probabilities(p_dara, p_isa, proportion_ever_isa_or_dara)
+            rescale_probabilities = lambda p1, p2, e: (p1 - e * PROBABILITY_RETREAT * p1 / (p1 + p2)) / (1 - e)
+            if p_isa + p_dara:
+                p_isa_naive = rescale_probabilities(p_isa, p_dara, proportion_ever_isa_or_dara)
+                p_dara_naive = rescale_probabilities(p_dara, p_isa, proportion_ever_isa_or_dara)
+            else:
+                p_isa_naive = p_isa
+                p_dara_naive = p_dara
             if p_isa_naive + p_dara_naive > 1:
                 p_isa_naive = p_isa_naive / (p_isa_naive + p_dara_naive)
                 p_dara_naive = p_dara_naive / (p_isa_naive + p_dara_naive)
@@ -220,7 +224,10 @@ class MultipleMyelomaTreatmentCoverage:
             # Second group, simulants w/prior exposure to isa/dara, and will be retreated this line
             retreat = new_treatment_line & ever_isa_or_dara & retreat_mask
             retreat_choices = [models.TREATMENTS.isatuximab, models.TREATMENTS.daratumumab]
-            retreat_probs = [p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)]
+            if p_isa + p_dara:
+                retreat_probs = [p_isa / (p_isa + p_dara), p_dara / (p_isa + p_dara)]
+            else:
+                retreat_probs = [p_isa, p_dara]
 
             pop.loc[retreat, self.treatment_column] = self.randomness.choice(
                 pop.loc[retreat].index,
@@ -238,11 +245,13 @@ class MultipleMyelomaTreatmentCoverage:
             # pop.loc[no_retreat, retreated] does not change
 
             # Build registry mask
-            registry_eligible = registry_eligible | (~ever_isa & isa)
+            if self.registry_start_date <= event.time:
+                registry_eligible = registry_eligible | (~ever_isa & isa)
 
-        pop.loc[registry_eligible & registry_mask, self.registry_evaluation_status] = 'enrolled'
-        pop.loc[registry_eligible, self.registry_evaluation_date] = event.time
-        pop.loc[registry_eligible & ~registry_mask, self.registry_evaluation_status] = 'eligible'
+        if self.registry_start_date <= event.time:
+            pop.loc[registry_eligible & registry_mask, self.registry_evaluation_status] = 'enrolled'
+            pop.loc[registry_eligible, self.registry_evaluation_date] = event.time
+            pop.loc[registry_eligible & ~registry_mask, self.registry_evaluation_status] = 'eligible'
         self.population_view.update(pop)
 
     def get_current_coverage(self, time: pd.Timestamp) -> pd.DataFrame:

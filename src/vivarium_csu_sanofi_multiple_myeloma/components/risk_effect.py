@@ -99,7 +99,7 @@ class MultipleMyelomaRiskEffects:
 
     def on_time_step_cleanup(self, event: 'Event'):
         pop = self.population_view.get(event.index)
-        newly_with_condition = pop[f'{models.MULTIPLE_MYELOMA_1_STATE_NAME}_event_time'] > event.time
+        newly_with_condition = pop[f'{models.MULTIPLE_MYELOMA_1_STATE_NAME}_event_time'] == event.time
         pop = pop.loc[newly_with_condition]
         if not pop.empty:
             pop_update = self.set_values_on_diagnosis(pop)

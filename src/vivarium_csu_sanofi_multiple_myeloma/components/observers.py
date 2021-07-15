@@ -299,9 +299,12 @@ class SurvivalObserver:
         states = list(models.MULTIPLE_MYELOMA_WITH_CONDITION_STATES)
 
         for current_state, next_state in zip(states, states[1:] + [states[-1]]):
+            state_denominator = self.subset_state_denominator(pop, current_state, next_state, event)
+            if not state_denominator.empty:
+                print(f'current state: {current_state}, state denominator size: {len(state_denominator)}')
             for risk_status in itertools.product(*data_values.RISK_LEVEL_MAP.values()):
-                denominator = self.subset_risk_denominator(pop, risk_status)
-                denominator = self.subset_state_denominator(denominator, current_state, next_state, event)
+                denominator = self.subset_risk_denominator(state_denominator, risk_status)
+
                 alive_at_start = (denominator
                                   .groupby('group')
                                   .multiple_myeloma
@@ -319,6 +322,9 @@ class SurvivalObserver:
                                      .rename('progressed'))
                 survival_results = pd.concat([alive_at_start, died_by_end, progressed_by_end], axis=1)
                 survival_results.index = survival_results.index.astype(pd.Interval)
+                if not denominator.empty:
+                    survival_results_summary = survival_results.sum()
+                    print(f'risk_status: {risk_status}, denominator size: {len(denominator)}, summary: {survival_results.sum().to_dict()}')
                 treatment_line = current_state.split('_')[-1]
                 for interval, interval_data in survival_results.iterrows():
                     for measure, template in self.templates:
