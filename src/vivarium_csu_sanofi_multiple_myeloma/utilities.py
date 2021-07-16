@@ -101,6 +101,7 @@ class LogNormalHazardRate:
         q_975_stdnorm = norm().ppf(0.975)
         mu = np.log(self.hr)
         sigma = (np.log(self.hr_upper) - mu) / q_975_stdnorm
+        assert sigma > 0, "look for typos"
         self.hr_distribution = lognorm(s=sigma, scale=self.hr)
 
     def get_random_variable(self, percentile: float) -> float:
