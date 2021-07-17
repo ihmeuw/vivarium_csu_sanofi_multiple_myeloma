@@ -118,27 +118,27 @@ RENAL_RISK_EXPOSURE = {
 }
 
 RISK_PFS_HR = {
-    RISK_EXPOSURE_LEVELS.Male: (1.3, 1.04, 1.6),
-    RISK_EXPOSURE_LEVELS.Female: 1.0,
-    RISK_EXPOSURE_LEVELS.over_65: (1.7, 1.4, 2.1),
-    RISK_EXPOSURE_LEVELS.under_65: 1.0,
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.4, 1.1, 1.8),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.3, 1.0, 1.6),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.4, 1.1, 1.8),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: 1.0,
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.4, 1.1, 1.7),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: 1.0
+    RISK_EXPOSURE_LEVELS.Male: (1.117379506, 1.023631793, 1.206248002),
+    RISK_EXPOSURE_LEVELS.Female: (0.862760188, 0.758855373, 0.97236977),
+    RISK_EXPOSURE_LEVELS.over_65: (1.168929731, 1.109344393, 1.225450674),
+    RISK_EXPOSURE_LEVELS.under_65: (0.690375253, 0.58678021, 0.799586905),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: 1.,
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.029416953, 1.007427712, 1.051070122),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: 1.,
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.799597005, 0.652084796, 0.949398709),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.366074674, 1.140038711, 1.60581245),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.967734441, 0.946604126, 0.987657089)
 }
 
 RISK_OS_HR = {
-    RISK_EXPOSURE_LEVELS.Male: (1.8, 1.3, 2.5),
-    RISK_EXPOSURE_LEVELS.Female: 1.0,
-    RISK_EXPOSURE_LEVELS.over_65: (2.2, 1.6, 3.0),
-    RISK_EXPOSURE_LEVELS.under_65: 1.0,
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.7, 1.2, 2.4),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.8, 1.3, 2.7),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.7, 1.2, 2.4),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: 1.0,
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.9, 1.4, 2.6),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: 1.0
+    RISK_EXPOSURE_LEVELS.Male: (1.255109255, 1.112976053, 1.375112298),
+    RISK_EXPOSURE_LEVELS.Female: (0.701726923, 0.561419677, 0.867908693),
+    RISK_EXPOSURE_LEVELS.over_65: (1.236326008, 1.157185865, 1.302944895),
+    RISK_EXPOSURE_LEVELS.under_65: (0.566847231, 0.44474406, 0.711900129),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: 1.,
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.059433242, 1.019805071, 1.089014929),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: 1.,
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.595111041, 0.393585797, 0.865077955),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.788742852, 1.35961846, 2.299354949),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.930480771, 0.885475788, 0.968303487)
 }
