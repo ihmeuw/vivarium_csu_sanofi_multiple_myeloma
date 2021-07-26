@@ -1,3 +1,4 @@
+import itertools
 from typing import NamedTuple
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
@@ -56,6 +57,45 @@ OS_HR = {
     (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.residual, False): (0.952, 0.744, 1.145),
     (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.residual, True): (0.952, 0.744, 1.145),
 }
+
+# Randomized Clinical Trial Progression Free Survival Hazard Ratios
+RCT_PFS_HR = {
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.506, 0.402, 0.620),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.506, 0.402, 0.620),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.015, 1.011, 1.018),
+    # 2nd-4th lines
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.814, 0.593, 1.056),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, True): (0.927, 0.714, 1.077),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.949, 0.581, 1.681),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, True): (0.987, 0.892, 1.207),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.residual, False): (1.023, 0.627, 1.272),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.residual, True): (1.023, 0.627, 1.272),
+}
+
+# Fill in 3rd and 4th lines using the same values as in the 2nd line
+LATER_LINES = [models.MULTIPLE_MYELOMA_3_STATE_NAME, models.MULTIPLE_MYELOMA_4_STATE_NAME]
+ACTUAL_TREATMENTS = [t for t in models.TREATMENTS if t != models.TREATMENTS.not_treated]
+for line, treatment, retreated in itertools.product(LATER_LINES, ACTUAL_TREATMENTS, [True, False]):
+    RCT_PFS_HR[(line, treatment, retreated)] = RCT_PFS_HR[(models.MULTIPLE_MYELOMA_2_STATE_NAME, treatment, retreated)]
+
+# Randomized Clinical Trial Overall Survival Hazard Ratios
+RCT_OS_HR = {
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.760, 0.645, 0.895),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.760, 0.645, 0.895),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.007, 1.003, 1.010),
+    # 2nd-5th lines
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.031, 0.960, 1.105),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, True): (1.056, 0.928, 1.181),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, False): (1.031, 0.960, 1.105),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.daratumumab, True): (1.056, 0.928, 1.181),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.residual, False): (0.984, 0.929, 1.020),
+    (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.residual, True): (0.984, 0.929, 1.020),
+}
+# Fill in 3rd-5th lines using the same values as in the 2nd line
+LATER_LINES += [models.MULTIPLE_MYELOMA_5_STATE_NAME]
+for line, treatment, retreated in itertools.product(LATER_LINES, ACTUAL_TREATMENTS, [True, False]):
+    RCT_OS_HR[(line, treatment, retreated)] = RCT_OS_HR[(models.MULTIPLE_MYELOMA_2_STATE_NAME, treatment, retreated)]
+
 
 PROBABILITY_RETREAT = 0.15
 REGISTRY_ENROLL_PROBABILITY = 0.05

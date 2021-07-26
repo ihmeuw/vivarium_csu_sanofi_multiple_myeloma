@@ -63,3 +63,4 @@ configuration:
             by_sex: True
             by_year: True
     mm_treatment_scenario: 'baseline'
+    hazard_rate_source: 'population'

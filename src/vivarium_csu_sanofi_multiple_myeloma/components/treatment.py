@@ -6,9 +6,9 @@ import pandas as pd
 from vivarium.framework.randomness import get_hash
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
-from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS
-from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (OS_HR, PFS_HR, PROBABILITY_RETREAT,
-                                                                        REGISTRY_ENROLL_PROBABILITY)
+from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import SCENARIOS, HAZARD_RATE_SOURCES
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (OS_HR, PFS_HR, PROBABILITY_RETREAT, RCT_OS_HR,
+                                                                        RCT_PFS_HR, REGISTRY_ENROLL_PROBABILITY)
 from vivarium_csu_sanofi_multiple_myeloma.utilities import LogNormalHazardRate
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ def make_treatment_coverage(year, scenario):
     return coverage
 
 
-def make_hazard_ratios(draw: int):
+def make_hazard_ratios(draw: int, pfs: dict, os: dict):
     index_cols = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
     pfs_hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
     os_hazard_ratio = pd.DataFrame(columns=index_cols + ['hazard_ratio']).set_index(index_cols)
@@ -71,18 +71,18 @@ def make_hazard_ratios(draw: int):
     pfs_hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
     os_hazard_ratio.loc[(models.SUSCEPTIBLE_STATE_NAME, models.TREATMENTS.not_treated, False)] = 1.0
 
-    for key in PFS_HR:
+    for key in pfs:
         random_seed = '_'.join([str(k) for k in key] + [str(draw)])
         rs = np.random.RandomState(get_hash(random_seed))
         survival_percentile = rs.random()
-        pfs_hazard_ratio.loc[key] = LogNormalHazardRate(*PFS_HR[key]).get_random_variable(survival_percentile)
-        os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
+        pfs_hazard_ratio.loc[key] = LogNormalHazardRate(*pfs[key]).get_random_variable(survival_percentile)
+        os_hazard_ratio.loc[key] = LogNormalHazardRate(*os[key]).get_random_variable(survival_percentile)
 
-    for key in set(OS_HR).difference(PFS_HR):
+    for key in set(os).difference(pfs):
         random_seed = '_'.join([str(k) for k in key] + [str(draw)])
         rs = np.random.RandomState(get_hash(random_seed))
         survival_percentile = rs.random()
-        os_hazard_ratio.loc[key] = LogNormalHazardRate(*OS_HR[key]).get_random_variable(survival_percentile)
+        os_hazard_ratio.loc[key] = LogNormalHazardRate(*os[key]).get_random_variable(survival_percentile)
 
     pfs_hazard_ratio = pfs_hazard_ratio.reset_index()
     os_hazard_ratio = os_hazard_ratio.reset_index()
@@ -288,10 +288,20 @@ class MultipleMyelomaTreatmentEffect:
     def name(self) -> str:
         return self.__class__.__name__
 
+    # noinspection PyAttributeOutsideInit
     def setup(self, builder: 'Builder') -> None:
         draw = builder.configuration.input_data.input_draw_number
         required_columns = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
-        progression_hazard_ratio, mortality_hazard_ratio = make_hazard_ratios(draw)
+        hazard_rate_source = builder.configuration.hazard_rate_source
+        if hazard_rate_source == HAZARD_RATE_SOURCES.population:
+            os = OS_HR
+            pfs = PFS_HR
+        elif hazard_rate_source == HAZARD_RATE_SOURCES.clinical_trial:
+            os = RCT_OS_HR
+            pfs = RCT_PFS_HR
+        else:
+            raise ValueError(f"Unrecognized configuration.hazard_rate_source {str(hazard_rate_source)}")
+        progression_hazard_ratio, mortality_hazard_ratio = make_hazard_ratios(draw, pfs, os)
         self.progression_hazard_ratio = builder.lookup.build_table(
             progression_hazard_ratio,
             key_columns=required_columns,

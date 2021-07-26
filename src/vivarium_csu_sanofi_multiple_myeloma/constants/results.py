@@ -14,6 +14,7 @@ TOTAL_YLLS_COLUMN = 'years_of_life_lost'
 INPUT_DRAW_COLUMN = 'input_draw'
 RANDOM_SEED_COLUMN = 'random_seed'
 OUTPUT_SCENARIO_COLUMN = 'mm_treatment_scenario'
+HAZARD_RATE_SOURCE_COLUMN = 'hazard_rate_source'
 
 STANDARD_COLUMNS = {
     'total_population': TOTAL_POPULATION_COLUMN,
