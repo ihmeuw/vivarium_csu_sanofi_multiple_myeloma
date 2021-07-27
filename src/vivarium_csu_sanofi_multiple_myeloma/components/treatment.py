@@ -307,7 +307,7 @@ class MultipleMyelomaTreatmentEffect:
         self.configuration_defaults = {
             'mm_scenarios': {
                 'hazard_rate_source': MultipleMyelomaTreatmentEffect.configuration_defaults[
-                    'mm_treatment_scenario']['hazard_rate_source']
+                    'mm_scenarios']['hazard_rate_source']
             }
         }
 
