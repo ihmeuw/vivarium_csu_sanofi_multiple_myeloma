@@ -306,7 +306,7 @@ class MultipleMyelomaTreatmentEffect:
     def __init__(self):
         self.configuration_defaults = {
             'mm_scenarios': {
-                'hazard_rate_source': MultipleMyelomaTreatmentCoverage.configuration_defaults[
+                'hazard_rate_source': MultipleMyelomaTreatmentEffect.configuration_defaults[
                     'mm_treatment_scenario']['hazard_rate_source']
             }
         }
