@@ -3,5 +3,5 @@ random_seed_count: 10
 
 branches:
   - mm_scenarios:
-    mm_treatment_scenario: ['baseline', 'alternative']
-    hazard_rate_source: ['population', 'clinical_trial']
+      mm_treatment_scenario: ['baseline', 'alternative']
+      hazard_rate_source: ['population', 'clinical_trial']
