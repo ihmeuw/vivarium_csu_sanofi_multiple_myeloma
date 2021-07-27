@@ -99,19 +99,29 @@ def make_hazard_ratios(draw: int, pfs: dict, os: dict):
 class MultipleMyelomaTreatmentCoverage:
 
     configuration_defaults = {
-        'mm_treatment_scenario': SCENARIOS.baseline,
+        'mm_scenarios': {
+            'mm_treatment_scenario': SCENARIOS.baseline,
+        }
     }
 
     @property
     def name(self):
         return self.__class__.__name__
 
+    def __init__(self):
+        self.configuration_defaults = {
+            'mm_scenarios': {
+                'mm_treatment_scenario': MultipleMyelomaTreatmentCoverage.configuration_defaults[
+                    'mm_scenarios']['mm_treatment_scenario'],
+            }
+        }
+
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: 'Builder') -> None:
         self.clock = builder.time.clock()
         self.randomness = builder.randomness.get_stream(self.name)
 
-        scenario = builder.configuration.mm_treatment_scenario
+        scenario = builder.configuration.mm_scenarios.mm_treatment_scenario
         assert scenario in SCENARIOS
         self.coverage = {}
         for year in (2016, 2019, 2020, 2021, 2025):
@@ -283,16 +293,29 @@ class MultipleMyelomaTreatmentCoverage:
 
 
 class MultipleMyelomaTreatmentEffect:
+    configuration_defaults = {
+        'mm_scenarios': {
+            'hazard_rate_source': HAZARD_RATE_SOURCES.population
+        }
+    }
 
     @property
     def name(self) -> str:
         return self.__class__.__name__
 
+    def __init__(self):
+        self.configuration_defaults = {
+            'mm_scenarios': {
+                'hazard_rate_source': MultipleMyelomaTreatmentCoverage.configuration_defaults[
+                    'mm_treatment_scenario']['hazard_rate_source']
+            }
+        }
+
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: 'Builder') -> None:
         draw = builder.configuration.input_data.input_draw_number
         required_columns = [models.MULTIPLE_MYELOMA_MODEL_NAME, 'multiple_myeloma_treatment', 'retreated']
-        hazard_rate_source = builder.configuration.hazard_rate_source
+        hazard_rate_source = builder.configuration.mm_scenarios.hazard_rate_source
         if hazard_rate_source == HAZARD_RATE_SOURCES.population:
             os = OS_HR
             pfs = PFS_HR
