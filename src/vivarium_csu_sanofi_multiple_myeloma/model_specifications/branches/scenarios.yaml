@@ -2,4 +2,6 @@ input_draw_count: 66
 random_seed_count: 10
 
 branches:
-  - mm_treatment_scenario: ['baseline', 'alternative']
+  - mm_scenarios:
+      mm_treatment_scenario: ['baseline', 'alternative']
+      hazard_rate_source: ['population', 'clinical_trial']

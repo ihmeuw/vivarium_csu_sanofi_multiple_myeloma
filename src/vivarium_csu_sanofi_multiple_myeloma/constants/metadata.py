@@ -24,3 +24,11 @@ class __Scenarios(NamedTuple):
 
 
 SCENARIOS = __Scenarios(*__Scenarios._fields)
+
+
+class __HazardRateSources(NamedTuple):
+    population: str
+    clinical_trial: str
+
+
+HAZARD_RATE_SOURCES = __HazardRateSources(*__HazardRateSources._fields)
