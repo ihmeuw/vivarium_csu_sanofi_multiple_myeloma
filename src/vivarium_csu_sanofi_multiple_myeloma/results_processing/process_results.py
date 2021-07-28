@@ -9,9 +9,11 @@ from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS
 
 
 SCENARIO_COLUMN = 'scenario'
+HAZARD_RATE_SOURCE_COLUMN = 'hazard_rate_source'
 GROUPBY_COLUMNS = [
     results.INPUT_DRAW_COLUMN,
-    SCENARIO_COLUMN
+    SCENARIO_COLUMN,
+    HAZARD_RATE_SOURCE_COLUMN
 ]
 OUTPUT_COLUMN_SORT_ORDER = [
     'age_group',
@@ -65,6 +67,7 @@ def read_data(path: Path, single_run: bool) -> (pd.DataFrame, List[str]):
             .drop(columns=data.columns.intersection(results.THROWAWAY_COLUMNS))
             .reset_index(drop=True)
             .rename(columns={results.OUTPUT_SCENARIO_COLUMN: SCENARIO_COLUMN})
+            .rename(columns={results.HAZARD_RATE_SOURCE_COLUMN: HAZARD_RATE_SOURCE_COLUMN})
             )
     if single_run:
         data[results.INPUT_DRAW_COLUMN] = 0
