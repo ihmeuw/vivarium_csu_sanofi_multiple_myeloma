@@ -13,8 +13,8 @@ TOTAL_YLLS_COLUMN = 'years_of_life_lost'
 # Columns from parallel runs
 INPUT_DRAW_COLUMN = 'input_draw'
 RANDOM_SEED_COLUMN = 'random_seed'
-OUTPUT_SCENARIO_COLUMN = 'mm_treatment_scenario'
-HAZARD_RATE_SOURCE_COLUMN = 'hazard_rate_source'
+OUTPUT_SCENARIO_COLUMN = 'mm_scenarios.mm_treatment_scenario'
+HAZARD_RATE_SOURCE_COLUMN = 'mm_scenarios.hazard_rate_source'
 
 STANDARD_COLUMNS = {
     'total_population': TOTAL_POPULATION_COLUMN,

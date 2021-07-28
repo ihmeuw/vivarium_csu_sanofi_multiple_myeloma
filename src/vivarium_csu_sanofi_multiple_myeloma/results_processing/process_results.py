@@ -72,7 +72,8 @@ def read_data(path: Path, single_run: bool) -> (pd.DataFrame, List[str]):
         data[SCENARIO_COLUMN] = 'baseline'
         keyspace = {results.INPUT_DRAW_COLUMN: [0],
                     results.RANDOM_SEED_COLUMN: [0],
-                    results.OUTPUT_SCENARIO_COLUMN: ['baseline']}
+                    results.OUTPUT_SCENARIO_COLUMN: ['baseline'],
+                    results.HAZARD_RATE_SOURCE_COLUMN: ['population']}
     else:
         data[results.INPUT_DRAW_COLUMN] = data[results.INPUT_DRAW_COLUMN].astype(int)
         data[results.RANDOM_SEED_COLUMN] = data[results.RANDOM_SEED_COLUMN].astype(int)
