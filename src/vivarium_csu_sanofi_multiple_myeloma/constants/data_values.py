@@ -157,28 +157,57 @@ RENAL_RISK_EXPOSURE = {
     RISK_EXPOSURE_LEVELS.renal_unimpaired: (1 - RENAL_RISK_EXPOSURE)
 }
 
-RISK_PFS_HR = {
-    RISK_EXPOSURE_LEVELS.Male: (1.117379506, 1.023631793, 1.206248002),
-    RISK_EXPOSURE_LEVELS.Female: (0.862760188, 0.758855373, 0.97236977),
-    RISK_EXPOSURE_LEVELS.over_65: (1.168929731, 1.109344393, 1.225450674),
-    RISK_EXPOSURE_LEVELS.under_65: (0.690375253, 0.58678021, 0.799586905),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.311878770, 1.056678749, 1.584507832),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (0.960405579, 0.898572409, 1.020472796),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.311878770, 1.056678749, 1.584507832),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.745715288, 0.624228519, 0.886872848),
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.366074674, 1.140038711, 1.60581245),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.967734441, 0.946604126, 0.987657089)
+# Hazard ratios from the CoMMpass registry (2a)
+RISK_PFS_HR_2A = {
+    RISK_EXPOSURE_LEVELS.Male: (1.12, 1.02, 1.21),
+    RISK_EXPOSURE_LEVELS.Female: (0.86, 0.76, 0.97),
+    RISK_EXPOSURE_LEVELS.over_65: (1.17, 1.11, 1.23),
+    RISK_EXPOSURE_LEVELS.under_65: (0.69, 0.59, 0.8),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.31, 1.06, 1.59),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.31, 1.06, 1.59),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.31, 1.06, 1.59),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.75, 0.62, 0.89),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.37, 1.14, 1.61),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.97, 0.95, 0.99)
 }
 
-RISK_OS_HR = {
-    RISK_EXPOSURE_LEVELS.Male: (1.255109255, 1.112976053, 1.375112298),
-    RISK_EXPOSURE_LEVELS.Female: (0.701726923, 0.561419677, 0.867908693),
-    RISK_EXPOSURE_LEVELS.over_65: (1.236326008, 1.157185865, 1.302944895),
-    RISK_EXPOSURE_LEVELS.under_65: (0.566847231, 0.44474406, 0.711900129),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.519586719, 1.147138585, 1.906550411),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (0.940421232, 0.852859054, 1.026932501),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.519586719, 1.147138585, 1.906550411),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.532865764, 0.345350636, 0.786647960),
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.788742852, 1.35961846, 2.299354949),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.930480771, 0.885475788, 0.968303487)
+RISK_OS_HR_2A = {
+    RISK_EXPOSURE_LEVELS.Male: (1.26, 1.11, 1.38),
+    RISK_EXPOSURE_LEVELS.Female: (0.7, 0.56, 0.87),
+    RISK_EXPOSURE_LEVELS.over_65: (1.24, 1.16, 1.3),
+    RISK_EXPOSURE_LEVELS.under_65: (0.57, 0.44, 0.71),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.52, 1.15, 1.91),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (0.94, 0.85, 1.03),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.52, 1.15, 1.91),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.53, 0.35, 0.79),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.79, 1.36, 2.3),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.93, 0.89, 0.97)
+}
+
+# Assumption of no impact of race on multiple myeloma survival outcomes independent of age (2b)
+# i.e., race_impact_scenario == no_impact
+RISK_PFS_HR_2B = {
+    RISK_EXPOSURE_LEVELS.Male: (1.12, 1.02, 1.21),
+    RISK_EXPOSURE_LEVELS.Female: (0.86, 0.76, 0.97),
+    RISK_EXPOSURE_LEVELS.over_65: (1.17, 1.11, 1.23),
+    RISK_EXPOSURE_LEVELS.under_65: (0.69, 0.59, 0.8),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.06, 1.03, 1.08),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.06, 1.03, 1.08),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (0.63, 0.49, 0.79),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.63, 0.49, 0.79),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.37, 1.14, 1.61),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.97, 0.95, 0.99)
+}
+
+RISK_OS_HR_2B = {
+    RISK_EXPOSURE_LEVELS.Male: (1.26, 1.11, 1.38),
+    RISK_EXPOSURE_LEVELS.Female: (0.7, 0.56, 0.87),
+    RISK_EXPOSURE_LEVELS.over_65: (1.24, 1.16, 1.3),
+    RISK_EXPOSURE_LEVELS.under_65: (0.57, 0.44, 0.71),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.05, 1.02, 1.07),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.05, 1.02, 1.07),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (0.66, 0.52, 0.84),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.66, 0.52, 0.84),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.79, 1.36, 2.3),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.93, 0.89, 0.97)
 }

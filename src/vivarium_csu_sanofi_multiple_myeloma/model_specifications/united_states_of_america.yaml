@@ -65,3 +65,4 @@ configuration:
     mm_scenarios:
         mm_treatment_scenario: 'baseline'
         hazard_rate_source: 'population'
+        race_impact_scenario: 'commpass_registry'

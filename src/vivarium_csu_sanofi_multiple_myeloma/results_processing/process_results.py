@@ -10,10 +10,12 @@ from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS
 
 SCENARIO_COLUMN = 'scenario'
 HAZARD_RATE_SOURCE_COLUMN = 'hazard_rate_source'
+RACE_IMPACT_SCENARIO_COLUMN = 'race_impact_scenario'
 GROUPBY_COLUMNS = [
     results.INPUT_DRAW_COLUMN,
     SCENARIO_COLUMN,
-    HAZARD_RATE_SOURCE_COLUMN
+    HAZARD_RATE_SOURCE_COLUMN,
+    RACE_IMPACT_SCENARIO_COLUMN
 ]
 OUTPUT_COLUMN_SORT_ORDER = [
     'age_group',
@@ -68,6 +70,7 @@ def read_data(path: Path, single_run: bool) -> (pd.DataFrame, List[str]):
             .reset_index(drop=True)
             .rename(columns={results.OUTPUT_SCENARIO_COLUMN: SCENARIO_COLUMN})
             .rename(columns={results.HAZARD_RATE_SOURCE_COLUMN: HAZARD_RATE_SOURCE_COLUMN})
+            .rename(columns={results.RACE_IMPACT_SCENARIO_COLUMN: RACE_IMPACT_SCENARIO_COLUMN})
             )
     if single_run:
         data[results.INPUT_DRAW_COLUMN] = 0
@@ -76,7 +79,8 @@ def read_data(path: Path, single_run: bool) -> (pd.DataFrame, List[str]):
         keyspace = {results.INPUT_DRAW_COLUMN: [0],
                     results.RANDOM_SEED_COLUMN: [0],
                     results.OUTPUT_SCENARIO_COLUMN: ['baseline'],
-                    results.HAZARD_RATE_SOURCE_COLUMN: ['population']}
+                    results.HAZARD_RATE_SOURCE_COLUMN: ['population'],
+                    results.RACE_IMPACT_SCENARIO_COLUMN: ['commpass_registry']}
     else:
         data[results.INPUT_DRAW_COLUMN] = data[results.INPUT_DRAW_COLUMN].astype(int)
         data[results.RANDOM_SEED_COLUMN] = data[results.RANDOM_SEED_COLUMN].astype(int)

@@ -132,7 +132,8 @@ class MultipleMyelomaTreatmentCoverage:
         # Did they previously receive isatuximab or daratumumab
         self.ever_isa_or_dara_column = 'ever_isa_or_dara'
         self.retreated_column = 'retreated'
-        self.registry_evaluation_status = 'registry_evaluation_status'  # 4 potential values: unevaluated, eligible, enrolled
+        # registry_evaluation_status has 3 potential values: unevaluated, eligible, enrolled
+        self.registry_evaluation_status = 'registry_evaluation_status'
         self.registry_evaluation_date = 'registry_evaluation_date'
         self.ever_isa = 'ever_isa'
         self.registry_start_date = pd.Timestamp('2021-01-01')
@@ -323,7 +324,7 @@ class MultipleMyelomaTreatmentEffect:
             os = RCT_OS_HR
             pfs = RCT_PFS_HR
         else:
-            raise ValueError(f"Unrecognized configuration.hazard_rate_source {str(hazard_rate_source)}")
+            raise ValueError(f"Unknown configuration.mm_scenarios.hazard_rate_source {str(hazard_rate_source)}")
         progression_hazard_ratio, mortality_hazard_ratio = make_hazard_ratios(draw, pfs, os)
         self.progression_hazard_ratio = builder.lookup.build_table(
             progression_hazard_ratio,

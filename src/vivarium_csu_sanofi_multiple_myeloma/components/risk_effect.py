@@ -1,7 +1,6 @@
 import itertools
-from collections import Counter
 
-from typing import Callable, Dict, Iterable, List, Tuple, TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -12,16 +11,14 @@ from vivarium.framework.event import Event
 from vivarium.framework.randomness import get_hash
 from vivarium.framework.population import SimulantData
 
-from vivarium_public_health.metrics.utilities import (get_deaths, get_person_time, get_state_person_time,
-                                                      get_transition_count,
-                                                      get_years_lived_with_disability, get_years_of_life_lost,
-                                                      TransitionString)
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import models, results
+from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import RACE_IMPACT_SCENARIO
+from vivarium_csu_sanofi_multiple_myeloma.constants import models
 from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (RACE_AND_CYTO_EXPOSURES,
                                                                         RENAL_RISK_EXPOSURE, RISKS,
                                                                         RISK_EXPOSURE_LEVELS, RISK_LEVEL_MAP,
-                                                                        RISK_OS_HR, RISK_PFS_HR, UNDIAGNOSED)
+                                                                        RISK_OS_HR_2A, RISK_PFS_HR_2A, RISK_OS_HR_2B,
+                                                                        RISK_PFS_HR_2B, UNDIAGNOSED)
 from vivarium_csu_sanofi_multiple_myeloma.utilities import LogNormalHazardRate
 
 if TYPE_CHECKING:
@@ -50,10 +47,20 @@ class MultipleMyelomaRiskEffects:
         self.required_columns = required_columns
         created_columns = list(RISKS)
 
+        race_impact_scenario = builder.configuration.mm_scenarios.hazard_rate_source
+        if race_impact_scenario == RACE_IMPACT_SCENARIO.commpass_registry:
+            os = RISK_OS_HR_2A
+            pfs = RISK_PFS_HR_2A
+        elif race_impact_scenario == RACE_IMPACT_SCENARIO.no_impact:
+            os = RISK_OS_HR_2B
+            pfs = RISK_PFS_HR_2B
+        else:
+            raise ValueError(f"Unknown configuration.mm_scenarios.race_impact_scenario {str(race_impact_scenario)}")
+
         # for age and sex, load and sample PFS ratio and OS ratio, get single scalar per risk
         # wrap scalars in a lookup table (dictionary of lookups e.g. pfs_hazard_ratios)
         draw = builder.configuration.input_data.input_draw_number
-        progression_hazard_ratio, mortality_hazard_ratio = make_hazard_ratios(draw)
+        progression_hazard_ratio, mortality_hazard_ratio = make_hazard_ratios(draw, pfs, os)
         self.progression_hazard_ratio = builder.lookup.build_table(
             progression_hazard_ratio,
             key_columns=created_columns,
@@ -123,7 +130,7 @@ class MultipleMyelomaRiskEffects:
         return risk_exposure
 
 
-def make_hazard_ratios(draw: int):
+def make_hazard_ratios(draw: int, pfs: Dict, os: Dict):
     idx = pd.MultiIndex.from_product(RISK_LEVEL_MAP.values(), names=RISK_LEVEL_MAP.keys())
     pfs_hazard_ratio = pd.Series(1.0, name='hazard_ratio', index=idx)
     os_hazard_ratio = pd.Series(1.0, name='hazard_ratio', index=idx)
@@ -132,13 +139,13 @@ def make_hazard_ratios(draw: int):
     os_hazard_ratio.loc[(UNDIAGNOSED, UNDIAGNOSED, UNDIAGNOSED, UNDIAGNOSED)] = 1.0
 
     for risk_level_key in itertools.product(*RISK_LEVEL_MAP.values()):
-        pfs, os = 1.0, 1.0
+        pfs_hr, os_hr = 1.0, 1.0
         for risk_level in risk_level_key:
-            risk_level_pfs, risk_level_os = sample_pfs_and_os(risk_level, draw)
-            pfs *= risk_level_pfs
-            os *= risk_level_os
-        pfs_hazard_ratio.loc[risk_level_key] = pfs
-        os_hazard_ratio.loc[risk_level_key] = os
+            risk_level_pfs, risk_level_os = sample_pfs_and_os(risk_level, draw, pfs, os)
+            pfs_hr *= risk_level_pfs
+            os_hr *= risk_level_os
+        pfs_hazard_ratio.loc[risk_level_key] = pfs_hr
+        os_hazard_ratio.loc[risk_level_key] = os_hr
 
     pfs_hazard_ratio = pfs_hazard_ratio.reset_index()
     os_hazard_ratio = os_hazard_ratio.reset_index()
@@ -152,14 +159,14 @@ def make_hazard_ratios(draw: int):
     return pfs_hazard_ratio, os_hazard_ratio
 
 
-def sample_pfs_and_os(risk_level: str, draw: int):
+def sample_pfs_and_os(risk_level: str, draw: int, pfs: Dict, os: Dict):
     random_seed = f'{risk_level}_{draw}'
     rs = np.random.RandomState(get_hash(random_seed))
     survival_percentile = rs.random()
-    pfs_hr = RISK_PFS_HR[risk_level]
+    pfs_hr = pfs[risk_level]
     if isinstance(pfs_hr, tuple):
         pfs_hr = LogNormalHazardRate(*pfs_hr).get_random_variable(survival_percentile)
-    os_hr = RISK_OS_HR[risk_level]
+    os_hr = os[risk_level]
     if isinstance(os_hr, tuple):
         os_hr = LogNormalHazardRate(*os_hr).get_random_variable(survival_percentile)
     return pfs_hr, os_hr

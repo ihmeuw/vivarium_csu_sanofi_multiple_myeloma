@@ -5,3 +5,4 @@ branches:
   - mm_scenarios:
       mm_treatment_scenario: ['baseline', 'alternative']
       hazard_rate_source: ['population', 'clinical_trial']
+      race_impact_scenario: ['commpass_registry', 'no_impact']
