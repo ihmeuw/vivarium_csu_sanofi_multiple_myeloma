@@ -47,7 +47,7 @@ class MultipleMyelomaRiskEffects:
         self.required_columns = required_columns
         created_columns = list(RISKS)
 
-        race_impact_scenario = builder.configuration.mm_scenarios.hazard_rate_source
+        race_impact_scenario = builder.configuration.mm_scenarios.race_impact_scenario
         if race_impact_scenario == RACE_IMPACT_SCENARIO.commpass_registry:
             os = RISK_OS_HR_2A
             pfs = RISK_PFS_HR_2A
