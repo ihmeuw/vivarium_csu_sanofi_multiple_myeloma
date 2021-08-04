@@ -32,3 +32,11 @@ class __HazardRateSources(NamedTuple):
 
 
 HAZARD_RATE_SOURCES = __HazardRateSources(*__HazardRateSources._fields)
+
+
+class __RaceImpactScenario(NamedTuple):
+    commpass_registry: str
+    no_impact: str
+
+
+RACE_IMPACT_SCENARIO = __RaceImpactScenario(*__RaceImpactScenario._fields)

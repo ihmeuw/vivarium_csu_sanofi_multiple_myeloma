@@ -15,6 +15,7 @@ INPUT_DRAW_COLUMN = 'input_draw'
 RANDOM_SEED_COLUMN = 'random_seed'
 OUTPUT_SCENARIO_COLUMN = 'mm_scenarios.mm_treatment_scenario'
 HAZARD_RATE_SOURCE_COLUMN = 'mm_scenarios.hazard_rate_source'
+RACE_IMPACT_SCENARIO_COLUMN = 'mm_scenarios.race_impact_scenario'
 
 STANDARD_COLUMNS = {
     'total_population': TOTAL_POPULATION_COLUMN,
