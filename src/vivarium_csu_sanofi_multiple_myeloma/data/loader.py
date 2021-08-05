@@ -127,7 +127,7 @@ def _load_em_from_meid(location, meid, measure):
     return vi_utils.sort_hierarchical_data(data)
 
 
-# TODO - add project-specific data functions here
+# Project-specific data functions
 def load_acmr(key: str, location) -> pd.DataFrame:
     return load_standard_data('cause.all_causes.cause_specific_mortality_rate', location)
 
