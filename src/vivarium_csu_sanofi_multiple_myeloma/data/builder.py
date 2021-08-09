@@ -92,26 +92,3 @@ def write_data(artifact: Artifact, key: str, data: pd.DataFrame):
         artifact.write(key, data)
     return artifact.load(key)
 
-# # TODO - writing and reading by draw is necessary if you are using
-# #        LBWSG data. Find the read function in utilities.py
-# def write_data_by_draw(artifact: Artifact, key: str, data: pd.DataFrame):
-#     """Writes data to the artifact on a per-draw basis. This is useful
-#     for large datasets like Low Birthweight Short Gestation (LBWSG).
-#
-#     Parameters
-#     ----------
-#     artifact
-#         The artifact to write to.
-#     key
-#         The entity key associated with the data to write.
-#     data
-#         The data to write.
-#
-#     """
-#     with pd.HDFStore(artifact.path, complevel=9, mode='a') as store:
-#         key = EntityKey(key)
-#         artifact._keys.append(key)
-#         store.put(f'{key.path}/index', data.index.to_frame(index=False))
-#         data = data.reset_index(drop=True)
-#         for c in data.columns:
-#             store.put(f'{key.path}/{c}', data[c])

@@ -30,9 +30,6 @@ class __Population(NamedTuple):
 POPULATION = __Population()
 
 
-# TODO - sample key group used to identify keys in model
-# For more information see the tutorial:
-# https://vivarium-inputs.readthedocs.io/en/latest/tutorials/pulling_data.html#entity-measure-data
 class __MultipleMyeloma(NamedTuple):
 
     # Keys that will be loaded into the artifact. must have a colon type declaration
