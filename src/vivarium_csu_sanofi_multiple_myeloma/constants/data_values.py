@@ -4,7 +4,7 @@ from typing import NamedTuple
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 
 
-# Population-based Hazard Ratio PFS Distributions
+# Population-based Hazard Ratio PFS Distributions (1a)
 PFS_HR = {
     (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.932, 0.647, 1.365),
     (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.932, 0.647, 1.365),
@@ -28,7 +28,7 @@ PFS_HR = {
     (models.MULTIPLE_MYELOMA_4_STATE_NAME, models.TREATMENTS.residual, True): (0.955, 0.822, 1.081),
 }
 
-# Population-based Hazard Ratio OS Distributions
+# Population-based Hazard Ratio OS Distributions (1a)
 OS_HR = {
     (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.971, 0.627, 1.488),
     (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.971, 0.627, 1.488),
@@ -58,11 +58,11 @@ OS_HR = {
     (models.MULTIPLE_MYELOMA_5_STATE_NAME, models.TREATMENTS.residual, True): (0.952, 0.744, 1.145),
 }
 
-# Randomized Clinical Trial Progression Free Survival Hazard Ratios
+# Randomized Clinical Trial Progression Free Survival Hazard Ratios (1b)
 RCT_PFS_HR = {
-    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.506, 0.402, 0.620),
-    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.506, 0.402, 0.620),
-    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.015, 1.011, 1.018),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.445, 0.356, 0.542),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.445, 0.356, 0.542),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.017, 1.014, 1.019),
     # 2nd-4th lines
     (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.814, 0.593, 1.056),
     (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, True): (0.927, 0.714, 1.077),
@@ -78,11 +78,11 @@ ACTUAL_TREATMENTS = [t for t in models.TREATMENTS if t != models.TREATMENTS.not_
 for line, treatment, retreated in itertools.product(LATER_LINES, ACTUAL_TREATMENTS, [True, False]):
     RCT_PFS_HR[(line, treatment, retreated)] = RCT_PFS_HR[(models.MULTIPLE_MYELOMA_2_STATE_NAME, treatment, retreated)]
 
-# Randomized Clinical Trial Overall Survival Hazard Ratios
+# Randomized Clinical Trial Overall Survival Hazard Ratios (1b)
 RCT_OS_HR = {
-    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.760, 0.645, 0.895),
-    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.760, 0.645, 0.895),
-    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.007, 1.003, 1.010),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.isatuximab, False): (0.632, 0.587, 0.683),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.daratumumab, False): (0.632, 0.587, 0.683),
+    (models.MULTIPLE_MYELOMA_1_STATE_NAME, models.TREATMENTS.residual, False): (1.011, 1.010, 1.012),
     # 2nd-5th lines
     (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, False): (1.031, 0.960, 1.105),
     (models.MULTIPLE_MYELOMA_2_STATE_NAME, models.TREATMENTS.isatuximab, True): (1.056, 0.928, 1.181),
@@ -142,8 +142,8 @@ UNDIAGNOSED = 'undiagnosed'
 SEX_RISK_EXPOSURE = 0.539  # exposed: male
 AGE_RISK_EXPOSURE = 0.647  # exposed: 65+
 RACE_RISK_EXPOSURE = 0.177  # exposed: black
-CYTOGENETIC_RISK_EXPOSURE = 0.872  # exposed: high
-RENAL_RISK_EXPOSURE = 0.081  # exposed: impaired
+CYTOGENETIC_RISK_EXPOSURE = 0.34  # exposed: high
+RENAL_RISK_EXPOSURE = 0.40  # exposed: impaired
 
 RACE_AND_CYTO_EXPOSURES = {
     RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: RACE_RISK_EXPOSURE * CYTOGENETIC_RISK_EXPOSURE,
@@ -163,12 +163,12 @@ RISK_PFS_HR_2A = {
     RISK_EXPOSURE_LEVELS.Female: (0.86, 0.76, 0.97),
     RISK_EXPOSURE_LEVELS.over_65: (1.17, 1.11, 1.23),
     RISK_EXPOSURE_LEVELS.under_65: (0.69, 0.59, 0.8),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.31, 1.06, 1.59),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.31, 1.06, 1.59),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.31, 1.06, 1.59),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.75, 0.62, 0.89),
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.37, 1.14, 1.61),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.97, 0.95, 0.99)
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.31, 1.07, 1.58),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.10, 0.96, 1.25),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.31, 1.07, 1.58),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.85, 0.76, 0.93),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.20, 1.09, 1.32),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.86, 0.79, 0.94)
 }
 
 RISK_OS_HR_2A = {
@@ -176,12 +176,12 @@ RISK_OS_HR_2A = {
     RISK_EXPOSURE_LEVELS.Female: (0.7, 0.56, 0.87),
     RISK_EXPOSURE_LEVELS.over_65: (1.24, 1.16, 1.3),
     RISK_EXPOSURE_LEVELS.under_65: (0.57, 0.44, 0.71),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.52, 1.15, 1.91),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (0.94, 0.85, 1.03),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.52, 1.15, 1.91),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.53, 0.35, 0.79),
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.79, 1.36, 2.3),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.93, 0.89, 0.97)
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.50, 1.14, 1.89),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.27, 0.98, 1.58),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (1.50, 1.14, 1.89),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.70, 0.55, 0.85),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.40, 1.20, 1.59),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.74, 0.61, 0.86)
 }
 
 # Assumption of no impact of race on multiple myeloma survival outcomes independent of age (2b)
@@ -191,12 +191,12 @@ RISK_PFS_HR_2B = {
     RISK_EXPOSURE_LEVELS.Female: (0.86, 0.76, 0.97),
     RISK_EXPOSURE_LEVELS.over_65: (1.17, 1.11, 1.23),
     RISK_EXPOSURE_LEVELS.under_65: (0.69, 0.59, 0.8),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.06, 1.03, 1.08),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.06, 1.03, 1.08),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (0.63, 0.49, 0.79),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.63, 0.49, 0.79),
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.37, 1.14, 1.61),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.97, 0.95, 0.99)
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.37, 1.19, 1.56),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.37, 1.19, 1.56),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (0.81, 0.71, 0.90),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.81, 0.71, 0.90),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.20, 1.09, 1.32),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.86, 0.79, 0.94)
 }
 
 RISK_OS_HR_2B = {
@@ -204,10 +204,10 @@ RISK_OS_HR_2B = {
     RISK_EXPOSURE_LEVELS.Female: (0.7, 0.56, 0.87),
     RISK_EXPOSURE_LEVELS.over_65: (1.24, 1.16, 1.3),
     RISK_EXPOSURE_LEVELS.under_65: (0.57, 0.44, 0.71),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.05, 1.02, 1.07),
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.05, 1.02, 1.07),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (0.66, 0.52, 0.84),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.66, 0.52, 0.84),
-    RISK_EXPOSURE_LEVELS.renal_impaired: (1.79, 1.36, 2.3),
-    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.93, 0.89, 0.97)
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (1.33, 1.14, 1.53),
+    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1.33, 1.14, 1.53),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (0.83, 0.73, 0.93),
+    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (0.83, 0.73, 0.93),
+    RISK_EXPOSURE_LEVELS.renal_impaired: (1.40, 1.20, 1.59),
+    RISK_EXPOSURE_LEVELS.renal_unimpaired: (0.74, 0.61, 0.86)
 }

@@ -76,7 +76,6 @@ AGE_GROUPS = (
     '90_to_94',
     '95_plus',
 )
-# TODO - add causes of death
 CAUSES_OF_DEATH = (
     'other_causes',
     models.SUSCEPTIBLE_STATE_NAME,
@@ -86,7 +85,6 @@ CAUSES_OF_DEATH = (
     models.MULTIPLE_MYELOMA_4_STATE_NAME,
     models.MULTIPLE_MYELOMA_5_STATE_NAME,
 )
-# TODO - add causes of disability
 CAUSES_OF_DISABILITY = (
     models.MULTIPLE_MYELOMA_1_STATE_NAME,
     models.MULTIPLE_MYELOMA_2_STATE_NAME,
