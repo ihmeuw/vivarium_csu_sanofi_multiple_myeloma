@@ -14,7 +14,7 @@ from vivarium.framework.population import SimulantData
 
 from vivarium_csu_sanofi_multiple_myeloma.constants.metadata import RACE_IMPACT_SCENARIO
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
-from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (RACE_AND_CYTO_EXPOSURES,
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import (CYTOGENETIC_RISK_EXPOSURE, RACE_RISK_EXPOSURES,
                                                                         RENAL_RISK_EXPOSURE, RISKS,
                                                                         RISK_EXPOSURE_LEVELS, RISK_LEVEL_MAP,
                                                                         RISK_OS_HR_2A, RISK_PFS_HR_2A, RISK_OS_HR_2B,
@@ -122,12 +122,33 @@ class MultipleMyelomaRiskEffects:
 
         risk_exposure.loc[with_condition, RISKS.sex_at_diagnosis] = pop.loc[with_condition, 'sex']
 
-        risk_exposure.loc[with_condition, RISKS.race_and_cytogenetic_risk_at_diagnosis] = self.randomness.choice(
-            risk_exposure.loc[with_condition].index, choices=list(RACE_AND_CYTO_EXPOSURES.keys()), p=list(RACE_AND_CYTO_EXPOSURES.values()))
+        for sex, over_65_ness in itertools.product(['Male', 'Female'], [True, False]):
+            mask = with_condition & (pop.sex == sex) & (over_65 == over_65_ness)
+            exposures = get_race_and_cytogenetic_exposures(sex, over_65_ness)
+            risk_exposure.loc[mask, RISKS.race_and_cytogenetic_risk_at_diagnosis] = self.randomness.choice(
+                risk_exposure.loc[mask].index,
+                choices=list(exposures.keys()),
+                p=list(exposures.values()))
 
         risk_exposure.loc[with_condition, RISKS.renal_function_at_diagnosis] = self.randomness.choice(
-            risk_exposure.loc[with_condition].index, choices=list(RENAL_RISK_EXPOSURE.keys()), p=list(RENAL_RISK_EXPOSURE.values()))
+            risk_exposure.loc[with_condition].index,
+            choices=list(RENAL_RISK_EXPOSURE.keys()),
+            p=list(RENAL_RISK_EXPOSURE.values()))
         return risk_exposure
+
+
+def get_race_and_cytogenetic_exposures(sex: str, over_65: bool):
+    """Calculate race and cytogenetic risk exposures by sex and boolean over_65"""
+    return {
+        RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: (RACE_RISK_EXPOSURES[sex][over_65]
+                                                               * CYTOGENETIC_RISK_EXPOSURE),
+        RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: ((1 - RACE_RISK_EXPOSURES[sex][over_65])
+                                                                   * CYTOGENETIC_RISK_EXPOSURE),
+        RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: (RACE_RISK_EXPOSURES[sex][over_65]
+                                                              * (1 - CYTOGENETIC_RISK_EXPOSURE)),
+        RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: ((1 - RACE_RISK_EXPOSURES[sex][over_65])
+                                                                  * (1 - CYTOGENETIC_RISK_EXPOSURE))
+    }
 
 
 def make_hazard_ratios(draw: int, pfs: Dict, os: Dict):

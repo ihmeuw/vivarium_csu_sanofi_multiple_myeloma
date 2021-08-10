@@ -139,18 +139,18 @@ RISK_LEVEL_MAP = {
 UNDIAGNOSED = 'undiagnosed'
 
 # Risk Exposure Distributions for Risk Effects Calculation
-SEX_RISK_EXPOSURE = 0.539  # exposed: male
-AGE_RISK_EXPOSURE = 0.647  # exposed: 65+
 RACE_RISK_EXPOSURE = 0.177  # exposed: black
 CYTOGENETIC_RISK_EXPOSURE = 0.872  # exposed: high
 RENAL_RISK_EXPOSURE = 0.081  # exposed: impaired
 
-RACE_AND_CYTO_EXPOSURES = {
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_black: RACE_RISK_EXPOSURE * CYTOGENETIC_RISK_EXPOSURE,
-    RISK_EXPOSURE_LEVELS.high_cytogenetic_risk_and_non_black: (1 - RACE_RISK_EXPOSURE) * CYTOGENETIC_RISK_EXPOSURE,
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_black: RACE_RISK_EXPOSURE * (1 - CYTOGENETIC_RISK_EXPOSURE),
-    RISK_EXPOSURE_LEVELS.low_cytogenetic_risk_and_non_black: (1 - RACE_RISK_EXPOSURE) * (1 - CYTOGENETIC_RISK_EXPOSURE)
-}
+# Age/sex adjusted race risk exposures
+RACE_RISK_EXPOSURES = {}  # exposed: black, indexed by sex, boolean of age > 65
+RACE_RISK_EXPOSURES['Male'] = {}
+RACE_RISK_EXPOSURES['Male'][True] = 0.159
+RACE_RISK_EXPOSURES['Male'][False] = 0.211
+RACE_RISK_EXPOSURES['Female'] = {}
+RACE_RISK_EXPOSURES['Female'][True] = 0.165
+RACE_RISK_EXPOSURES['Female'][False] = 0.225
 
 RENAL_RISK_EXPOSURE = {
     RISK_EXPOSURE_LEVELS.renal_impaired: RENAL_RISK_EXPOSURE,
