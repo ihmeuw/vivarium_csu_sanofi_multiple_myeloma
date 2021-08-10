@@ -1,7 +1,7 @@
 import itertools
 from collections import Counter
 
-from typing import Callable, Dict, Iterable, List, Tuple, TYPE_CHECKING
+from typing import Callable, Dict, Iterable, List, Tuple
 
 import pandas as pd
 from vivarium.framework.engine import Builder
@@ -13,7 +13,8 @@ from vivarium_public_health.metrics.utilities import (get_age_bins, get_deaths, 
                                                       get_transition_count, get_group_counts, get_output_template,
                                                       get_years_of_life_lost, TransitionString)
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import data_values, models, results, data_keys
+from vivarium_csu_sanofi_multiple_myeloma.constants import data_values, models, results
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS, RISK_LEVEL_MAP
 
 
 class ResultsStratifier:
@@ -26,9 +27,10 @@ class ResultsStratifier:
 
     """
 
-    def __init__(self, observer_name: str, stratify_by_treatment: bool = True):
+    def __init__(self, observer_name: str, stratify_by_treatment: bool = True, stratify_by_risks: bool = True):
         self.name = f'{observer_name}_results_stratifier'
         self.stratify_by_treatment = stratify_by_treatment
+        self.stratify_by_risks = stratify_by_risks
 
     # noinspection PyAttributeOutsideInit
     def setup(self, builder: Builder):
@@ -38,7 +40,9 @@ class ResultsStratifier:
         columns_required = [
             'age',
             'multiple_myeloma_treatment',
-            'retreated'
+            'retreated',
+            'race_and_cytogenetic_risk_at_diagnosis',
+            'renal_function_at_diagnosis'
         ]
 
         def get_treatment_state_function(state):
@@ -46,6 +50,12 @@ class ResultsStratifier:
 
         def get_retreatment_state_function(state):
             return lambda: self.population_values['retreated'] == state
+
+        def get_race_and_cytogenetic_risk_at_diagnosis_function(state):
+            return lambda: self.population_values['race_and_cytogenetic_risk_at_diagnosis'] == state
+
+        def get_renal_function_at_diagnosis(state):
+            return lambda: self.population_values['renal_function_at_diagnosis'] == state
 
         self.stratification_levels = {}
 
@@ -57,6 +67,18 @@ class ResultsStratifier:
             self.stratification_levels['retreated'] = {
                 retreatment_state: get_retreatment_state_function(retreatment_state)
                 for retreatment_state in (True, False)
+            }
+
+        if self.stratify_by_risks:
+            self.stratification_levels['race_and_cytogenetic_risk_at_diagnosis'] = {
+                race_and_cytogenetic_risk_at_diagnosis: get_race_and_cytogenetic_risk_at_diagnosis_function(
+                    race_and_cytogenetic_risk_at_diagnosis)
+                for race_and_cytogenetic_risk_at_diagnosis
+                in RISK_LEVEL_MAP[RISKS.race_and_cytogenetic_risk_at_diagnosis]
+            }
+            self.stratification_levels['renal_function_at_diagnosis'] = {
+                renal_function_at_diagnosis: get_renal_function_at_diagnosis(renal_function_at_diagnosis)
+                for renal_function_at_diagnosis in RISK_LEVEL_MAP[RISKS.renal_function_at_diagnosis]
             }
 
         self.population_view = builder.population.get_view(columns_required)
@@ -172,7 +194,7 @@ class ResultsStratifier:
 
 class MortalityObserver(MortalityObserver_):
 
-    def __init__(self, stratify_by_treatment: str = 'True'):
+    def __init__(self, stratify_by_treatment: str = 'True', ):
         super().__init__()
         self.stratifier = ResultsStratifier(self.name, stratify_by_treatment == 'True')
 
@@ -213,6 +235,7 @@ class MultipleMyelomaTreatmentObserver:
     def name(self) -> str:
         return self.__class__.__name__
 
+    # noinspection PyAttributeOutsideInit
     def setup(self, builder: 'Builder') -> None:
         self.counts = Counter()
         self.population_view = builder.population.get_view(
@@ -323,7 +346,6 @@ class SurvivalObserver:
                 survival_results = pd.concat([alive_at_start, died_by_end, progressed_by_end], axis=1)
                 survival_results.index = survival_results.index.astype(pd.Interval)
                 if not denominator.empty:
-                    survival_results_summary = survival_results.sum()
                     print(f'risk_status: {risk_status}, denominator size: {len(denominator)}, summary: {survival_results.sum().to_dict()}')
                 treatment_line = current_state.split('_')[-1]
                 for interval, interval_data in survival_results.iterrows():
