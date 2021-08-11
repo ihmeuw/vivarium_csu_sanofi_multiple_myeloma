@@ -191,7 +191,7 @@ def get_treatment_count_measure_data(data, measure):
 def get_survival_measure_data(data):
     data = pivot_data(data[results.RESULT_COLUMNS('survival_alive') + results.RESULT_COLUMNS('survival_other') + GROUPBY_COLUMNS])
     for s in reversed(RISKS):
-        data['process'], data[s] = data.process.str.split('_' + s.upper() + '_').str
+        data['process'], data[s] = data.process.str.split('_' + s + '_').str
     data['measure'], data['process'] = data.process.str.split('_period_').str
     data['period'], data['treatment_line'] = data.process.str.split('_line_').str
 
