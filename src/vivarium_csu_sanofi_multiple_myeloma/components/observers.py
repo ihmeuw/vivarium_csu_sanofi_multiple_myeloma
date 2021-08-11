@@ -194,9 +194,9 @@ class ResultsStratifier:
 
 class MortalityObserver(MortalityObserver_):
 
-    def __init__(self, stratify_by_treatment: str = 'True', ):
+    def __init__(self, stratify_by_treatment: str = 'True', stratify_by_risks: str = 'True'):
         super().__init__()
-        self.stratifier = ResultsStratifier(self.name, stratify_by_treatment == 'True')
+        self.stratifier = ResultsStratifier(self.name, stratify_by_treatment == 'True', stratify_by_risks == 'True')
 
     @property
     def sub_components(self) -> List[ResultsStratifier]:
@@ -294,7 +294,7 @@ class SurvivalObserver:
                      .append(pd.Index([pd.Interval(60*28, 1000*28)])))
 
         self.counts = Counter()
-        risk_template = '_'.join([f'{s.upper()}_{{{s}}}' for s in data_values.RISKS])
+        risk_template = '_'.join([f'{s}_{{{s}}}' for s in data_values.RISKS])
         count_template = 'alive_at_period_{period_start}_line_{treatment_line}' + '_' + risk_template
         progression_template = 'progressed_by_period_{period_end}_line_{treatment_line}' + '_' + risk_template
         death_template = 'died_by_period_{period_end}_line_{treatment_line}' + '_' + risk_template
@@ -420,9 +420,9 @@ class SurvivalObserver:
                                
 class DiseaseObserver(DiseaseObserver_):
 
-    def __init__(self, disease: str, stratify_by_treatment: str = 'True'):
+    def __init__(self, disease: str, stratify_by_treatment: str = 'True', stratify_by_risks: str = 'True'):
         super().__init__(disease)
-        self.stratifier = ResultsStratifier(self.name, stratify_by_treatment == 'True')
+        self.stratifier = ResultsStratifier(self.name, stratify_by_treatment == 'True', stratify_by_risks == 'True')
 
     @property
     def sub_components(self) -> List[ResultsStratifier]:
@@ -510,7 +510,7 @@ def get_entrances(pop: pd.DataFrame, age_bins: pd.DataFrame, event_time: pd.Time
             & (pop.registry_evaluation_status == evaluation_status))
     config = {'by_age': True, 'by_sex': True, 'by_year': True}
     result = {}
-    risk_template = '_'.join([f'{s.upper()}_{{}}' for s in [
+    risk_template = '_'.join([f'{s}_{{}}' for s in [
         data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis, data_values.RISKS.renal_function_at_diagnosis]])
 
     for rcr, rf in itertools.product(data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
@@ -530,7 +530,7 @@ def get_registry_population(pop: pd.DataFrame, age_bins: pd.DataFrame, event_tim
     mask = (pop.alive == 'alive') & (pop.registry_evaluation_status == 'enrolled')
     config = {'by_age': True, 'by_sex': True, 'by_year': True}
     result = {}
-    risk_template = '_'.join([f'{s.upper()}_{{}}' for s in [
+    risk_template = '_'.join([f'{s}_{{}}' for s in [
         data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis, data_values.RISKS.renal_function_at_diagnosis]])
     for rcr, rf in itertools.product(
             data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],

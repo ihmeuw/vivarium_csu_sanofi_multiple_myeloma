@@ -26,16 +26,16 @@ STANDARD_COLUMNS = {
 THROWAWAY_COLUMNS = [f'{state}_event_count' for state in models.STATES]
 
 TOTAL_POPULATION_COLUMN_TEMPLATE = 'total_population_{POP_STATE}'
-PERSON_TIME_COLUMN_TEMPLATE = 'person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
-DEATH_COLUMN_TEMPLATE = 'death_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
-YLLS_COLUMN_TEMPLATE = 'ylls_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
+PERSON_TIME_COLUMN_TEMPLATE = 'person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
+DEATH_COLUMN_TEMPLATE = 'death_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
+YLLS_COLUMN_TEMPLATE = 'ylls_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
 YLDS_COLUMN_TEMPLATE = 'ylds_due_to_{CAUSE_OF_DISABILITY}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}'
-STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
-TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}'
+STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
+TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
-SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s.upper()}}}' for s in data_values.RISKS])
-SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s.upper()}_{{{s.upper()}}}' for s in data_values.RISKS])
-REGISTRY_TEMPLATE = 'registry_status_{REGISTRY_STATUS}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_RENAL_FUNCTION_AT_DIAGNOSIS_{RENAL_FUNCTION_AT_DIAGNOSIS}'
+SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in data_values.RISKS])
+SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in data_values.RISKS])
+REGISTRY_TEMPLATE = 'registry_status_{REGISTRY_STATUS}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
 
 COLUMN_TEMPLATES = {
     'population': TOTAL_POPULATION_COLUMN_TEMPLATE,
@@ -118,7 +118,6 @@ TEMPLATE_FIELD_MAP = {
     'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
     'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis],
     'REGISTRY_STATUS': ['newly_eligible', 'newly_enrolled', 'enrolled']
-
 }
 
 
