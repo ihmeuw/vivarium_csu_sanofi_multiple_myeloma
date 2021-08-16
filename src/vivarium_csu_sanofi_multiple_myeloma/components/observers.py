@@ -344,7 +344,7 @@ class SurvivalObserver:
                                      .count()
                                      .rename('progressed'))
                 survival_results = pd.concat([alive_at_start, died_by_end, progressed_by_end], axis=1)
-                survival_results.index = survival_results.index.astype(pd.Interval)
+                survival_results.index = pd.IntervalIndex(survival_results.index)
                 if not denominator.empty:
                     print(f'risk_status: {risk_status}, denominator size: {len(denominator)}, summary: {survival_results.sum().to_dict()}')
                 treatment_line = current_state.split('_')[-1]
