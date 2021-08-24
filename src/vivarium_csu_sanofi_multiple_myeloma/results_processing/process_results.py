@@ -156,22 +156,6 @@ def split_processing_column(data, stratified_by_treatment=False, stratified_by_r
     return data.drop(columns='process')
 
 
-def new_split_processing_column(data, stratified_by_treatment=False, stratified_by_risks=False):
-    out = {'measure': [], 'year': [], 'sex': [], 'age': []}
-    if stratified_by_treatment:
-        out['treatment'] = []
-        out['retreated'] = []
-    if stratified_by_risks:
-        out['renal_function_at_diagnosis'] = []
-        out['race_and_cytogenetic_risk_at_diagnosis'] = []
-    out['value'] = []
-
-    for k, v in data.iterrows():
-        pass
-
-    # return data.drop(columns='process')
-
-
 def get_population_data(data):
     total_pop = pivot_data(data[[results.TOTAL_POPULATION_COLUMN]
                                 + results.RESULT_COLUMNS('population')
