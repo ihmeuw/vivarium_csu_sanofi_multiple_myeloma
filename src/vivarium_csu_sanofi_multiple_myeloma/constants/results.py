@@ -115,8 +115,8 @@ TEMPLATE_FIELD_MAP = {
     'RIGHT_PERIOD': ALL_PERIODS[1:],
     'SEX_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.sex_at_diagnosis],
     'AGE_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.age_at_diagnosis],
-    'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
-    'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis],
+    'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis] + [data_values.UNDIAGNOSED],
+    'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis] + [data_values.UNDIAGNOSED],
     'REGISTRY_STATUS': ['newly_eligible', 'newly_enrolled', 'enrolled']
 }
 
