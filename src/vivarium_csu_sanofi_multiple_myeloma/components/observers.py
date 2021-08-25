@@ -14,7 +14,7 @@ from vivarium_public_health.metrics.utilities import (get_age_bins, get_deaths, 
                                                       get_years_of_life_lost, TransitionString)
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import data_values, models, results
-from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS, RISK_LEVEL_MAP
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS, RISK_LEVEL_MAP, UNDIAGNOSED
 
 
 class ResultsStratifier:
@@ -74,11 +74,11 @@ class ResultsStratifier:
                 race_and_cytogenetic_risk_at_diagnosis: get_race_and_cytogenetic_risk_at_diagnosis_function(
                     race_and_cytogenetic_risk_at_diagnosis)
                 for race_and_cytogenetic_risk_at_diagnosis
-                in RISK_LEVEL_MAP[RISKS.race_and_cytogenetic_risk_at_diagnosis]
+                in RISK_LEVEL_MAP[RISKS.race_and_cytogenetic_risk_at_diagnosis] + [UNDIAGNOSED]
             }
             self.stratification_levels['renal_function_at_diagnosis'] = {
                 renal_function_at_diagnosis: get_renal_function_at_diagnosis(renal_function_at_diagnosis)
-                for renal_function_at_diagnosis in RISK_LEVEL_MAP[RISKS.renal_function_at_diagnosis]
+                for renal_function_at_diagnosis in RISK_LEVEL_MAP[RISKS.renal_function_at_diagnosis] + [UNDIAGNOSED]
             }
 
         self.population_view = builder.population.get_view(columns_required)
