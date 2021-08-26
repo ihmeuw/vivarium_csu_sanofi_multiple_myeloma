@@ -1,6 +1,7 @@
 import itertools
 
-from vivarium_csu_sanofi_multiple_myeloma.constants import models, data_values
+from vivarium_csu_sanofi_multiple_myeloma.constants import models
+from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS, RISK_LEVEL_MAP, UNDIAGNOSED
 
 #################################
 # Results columns and variables #
@@ -26,15 +27,15 @@ STANDARD_COLUMNS = {
 THROWAWAY_COLUMNS = [f'{state}_event_count' for state in models.STATES]
 
 TOTAL_POPULATION_COLUMN_TEMPLATE = 'total_population_{POP_STATE}'
-PERSON_TIME_COLUMN_TEMPLATE = 'person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
-DEATH_COLUMN_TEMPLATE = 'death_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
-YLLS_COLUMN_TEMPLATE = 'ylls_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
+PERSON_TIME_COLUMN_TEMPLATE = 'person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+DEATH_COLUMN_TEMPLATE = 'death_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+YLLS_COLUMN_TEMPLATE = 'ylls_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
 YLDS_COLUMN_TEMPLATE = 'ylds_due_to_{CAUSE_OF_DISABILITY}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}'
-STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
-TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
+STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
-SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in data_values.RISKS])
-SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in data_values.RISKS])
+SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in RISKS])
+SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in RISKS])
 REGISTRY_TEMPLATE = 'registry_status_{REGISTRY_STATUS}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS}'
 
 COLUMN_TEMPLATES = {
@@ -113,10 +114,14 @@ TEMPLATE_FIELD_MAP = {
     # CAUTION: This needs to change with the time step size.
     'LEFT_PERIOD': ALL_PERIODS[:-1],
     'RIGHT_PERIOD': ALL_PERIODS[1:],
-    'SEX_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.sex_at_diagnosis],
-    'AGE_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.age_at_diagnosis],
-    'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.race_and_cytogenetic_risk_at_diagnosis],
-    'RENAL_FUNCTION_AT_DIAGNOSIS': data_values.RISK_LEVEL_MAP[data_values.RISKS.renal_function_at_diagnosis],
+    'SEX_AT_DIAGNOSIS': RISK_LEVEL_MAP[RISKS.sex_at_diagnosis],
+    'AGE_AT_DIAGNOSIS': RISK_LEVEL_MAP[RISKS.age_at_diagnosis],
+    'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS': RISK_LEVEL_MAP[
+        RISKS.race_and_cytogenetic_risk_at_diagnosis],
+    'RENAL_FUNCTION_AT_DIAGNOSIS': RISK_LEVEL_MAP[RISKS.renal_function_at_diagnosis],
+    'RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT': RISK_LEVEL_MAP[
+                                                      RISKS.race_and_cytogenetic_risk_at_diagnosis] + [UNDIAGNOSED],
+    'RENAL_FUNCTION_AT_DIAGNOSIS_EXT': RISK_LEVEL_MAP[RISKS.renal_function_at_diagnosis] + [UNDIAGNOSED],
     'REGISTRY_STATUS': ['newly_eligible', 'newly_enrolled', 'enrolled']
 }
 
