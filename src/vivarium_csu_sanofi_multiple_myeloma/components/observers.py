@@ -90,7 +90,7 @@ class ResultsStratifier:
                                                  requires_columns=columns_required,
                                                  requires_values=list(self.pipelines.keys()))
 
-        builder.event.register_listener('time_step__prepare', self.on_timestep_prepare)
+        builder.event.register_listener('time_step__prepare', self.on_timestep_prepare, priority=0)
 
     # noinspection PyAttributeOutsideInit
     def on_initialize_simulants(self, pop_data: SimulantData):
