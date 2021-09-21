@@ -1,5 +1,7 @@
 import itertools
 
+import pandas as pd
+
 from vivarium_csu_sanofi_multiple_myeloma.constants import models
 from vivarium_csu_sanofi_multiple_myeloma.constants.data_values import RISKS, RISK_LEVEL_MAP, UNDIAGNOSED
 
@@ -27,12 +29,12 @@ STANDARD_COLUMNS = {
 THROWAWAY_COLUMNS = [f'{state}_event_count' for state in models.STATES]
 
 TOTAL_POPULATION_COLUMN_TEMPLATE = 'total_population_{POP_STATE}'
-PERSON_TIME_COLUMN_TEMPLATE = 'person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
-DEATH_COLUMN_TEMPLATE = 'death_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
-YLLS_COLUMN_TEMPLATE = 'ylls_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+PERSON_TIME_COLUMN_TEMPLATE = 'person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{RETREATED}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+DEATH_COLUMN_TEMPLATE = 'death_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{RETREATED}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+YLLS_COLUMN_TEMPLATE = 'ylls_due_to_{CAUSE_OF_DEATH}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{RETREATED}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
 YLDS_COLUMN_TEMPLATE = 'ylds_due_to_{CAUSE_OF_DISABILITY}_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}'
-STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
-TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{BOOL}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+STATE_PERSON_TIME_COLUMN_TEMPLATE = '{STATE}_person_time_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{RETREATED}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
+TRANSITION_COUNT_COLUMN_TEMPLATE = '{TRANSITION}_event_count_in_{YEAR}_among_{SEX}_in_age_group_{AGE_GROUP}_treatment_state_{TREATMENT}_retreated_{RETREATED}_race_and_cytogenetic_risk_at_diagnosis_{RACE_AND_CYTOGENETIC_RISK_AT_DIAGNOSIS_EXT}_renal_function_at_diagnosis_{RENAL_FUNCTION_AT_DIAGNOSIS_EXT}'
 TREATMENT_COUNT_COLUMN_TEMPLATE = 'line_{TREATMENT_LINE}_treatment_{TREATMENT}_year_{YEAR}'
 SURVIVAL_ALIVE_TEMPLATE = 'alive_at_period_{LEFT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in RISKS])
 SURVIVAL_OTHER_TEMPLATE = '{SURVIVAL_METRIC}_period_{RIGHT_PERIOD}_line_{TREATMENT_LINE}' + '_' + '_'.join([f'{s}_{{{s.upper()}}}' for s in RISKS])
@@ -109,7 +111,7 @@ TEMPLATE_FIELD_MAP = {
     'TRANSITION': models.TRANSITIONS,
     'TREATMENT': models.TREATMENTS,
     'TREATMENT_LINE': list(range(1, 6)),
-    'BOOL': ('True', 'False'),
+    'RETREATED': ('True', 'False'),
     'SURVIVAL_METRIC': ('progressed_by', 'died_by', 'sim_end_on'),
     # CAUTION: This needs to change with the time step size.
     'LEFT_PERIOD': ALL_PERIODS[:-1],
@@ -142,3 +144,26 @@ def RESULT_COLUMNS(kind='all'):
         for value_group in value_groups:
             columns.append(template.format(**{field: value for field, value in zip(fields, value_group)}))
     return columns
+
+# Spit out full string of results columns + mapping to results map fn -> df
+def RESULTS_MAP(kind='all'):
+    if kind not in COLUMN_TEMPLATES and kind != 'all':
+        raise ValueError(f'Unknown result column type {kind}')
+    columns = []
+    if kind == 'all':
+        # construct list of dataframes
+        for k in COLUMN_TEMPLATES:
+            # Add rows to df
+            df += RESULTS_MAP(k)
+        # TODO: handle STANDARD_COLUMNS
+        # columns = list(STANDARD_COLUMNS.values()) + columns
+    else:
+        # Add rows to df
+        rows = []
+        template = COLUMN_TEMPLATES[kind]
+        filtered_field_map = {field: values
+                              for field, values in TEMPLATE_FIELD_MAP.items() if f'{{{field}}}' in template}
+        fields, value_groups = filtered_field_map.keys(), itertools.product(*filtered_field_map.values())
+        for value_group in value_groups:
+            columns.append(template.format(**{field: value for field, value in zip(fields, value_group)}))
+    return df
