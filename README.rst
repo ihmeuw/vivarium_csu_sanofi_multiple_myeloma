@@ -19,11 +19,11 @@ your operating system at the following places:
 - `conda <https://docs.conda.io/en/latest/miniconda.html>`_
 
 Once you have all three installed, you should open up your normal shell
-(if you're on linux or OSX) or the ``git bash`` shell if you're on windows.
+(if you're on Linux or macOS) or the ``git bash`` shell if you're on Windows.
 You'll then make an environment, clone this repository, then install
 all necessary requirements as follows::
 
-  :~$ conda create --name=vivarium_csu_sanofi_multiple_myeloma python=3.6
+  :~$ conda create --name=vivarium_csu_sanofi_multiple_myeloma python=3.8
   ...conda will download python and base dependencies...
   :~$ conda activate vivarium_csu_sanofi_multiple_myeloma
   (vivarium_csu_sanofi_multiple_myeloma) :~$ git clone https://github.com/ihmeuw/vivarium_csu_sanofi_multiple_myeloma.git
@@ -74,48 +74,32 @@ You'll find six directories inside the main
 - ``components``
 
   This directory is for Python modules containing custom components for
-  the vivarium_csu_sanofi_multiple_myeloma project. You should work with the
-  engineering staff to help scope out what you need and get them built.
+  the vivarium_csu_sanofi_multiple_myeloma project.
 
 - ``data``
 
-  If you have **small scale** external data for use in your sim or in your
-  results processing, it can live here. This is almost certainly not the right
-  place for data, so make sure there's not a better place to put it first.
+  This directory contains  **small scale** external data for use in the simulation.
 
 - ``model_specifications``
 
-  This directory should hold all model specifications and branch files
+  This directory holds all model specifications and branch files
   associated with the project.
 
 - ``results_processing``
 
-  Any post-processing and analysis code or notebooks you write should be
-  stored in this directory.
+  The post-processing and analysis code is stored in this directory.
 
 - ``tools``
 
-  This directory hold Python files used to run scripts used to prepare input
-  data or process outputs.
+  This directory holds Python files used to run scripts used to prepare input data or process outputs.
 
 
 Running Simulations
 -------------------
 
-With your conda environment active, the first step to running simulations
-is making the model specification files.  A model specification is a
-complete description of a vivarium model. The command to generate model
-specifications is installed with this repository and it can be run
-from any directory.::
+With your conda environment active, you can then run simulations by, e.g.::
 
-  (vivarium_csu_sanofi_multiple_myeloma) :~$ make_specs -v
-  2020-06-18 18:18:28.311 | 0:00:00.679701 | build_model_specifications:48 - Writing model spec(s) to "/REPO_INSTALLATION_DIRECTORY/vivarium_csu_sanofi_multiple_myeloma/src/vivarium_csu_sanofi_multiple_myeloma/model_specifications"
-
-As the log message indicates, the model specifications will be written to
-the ``model_specifications`` subdirectory in this repository. You can then
-run simulations by, e.g.::
-
-   (vivarium_csu_sanofi_multiple_myeloma) :~$ simulate run -v /<REPO_INSTALLATION_DIRECTORY>/vivarium_csu_sanofi_multiple_myeloma/src/vivarium_csu_sanofi_multiple_myeloma/model_specifications/china.yaml
+   (vivarium_csu_sanofi_multiple_myeloma) :~$ simulate run -v /<REPO_INSTALLATION_DIRECTORY>/vivarium_csu_sanofi_multiple_myeloma/src/vivarium_csu_sanofi_multiple_myeloma/model_specifications/united_states_of_america.yaml
 
 The ``-v`` flag will log verbosely, so you will get log messages every time
 step. For more ways to run simulations, see the tutorials at
