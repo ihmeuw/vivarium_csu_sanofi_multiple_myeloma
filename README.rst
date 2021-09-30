@@ -2,6 +2,13 @@
 vivarium_csu_sanofi_multiple_myeloma
 ===============================
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5542097.svg
+   :target: https://doi.org/10.5281/zenodo.5542097
+
+Cite as:
+
+Matthew Kappel, Yongquan Xie, James Collins, Alison Bowman, & Abraham Flaxman. (2021). ihmeuw/vivarium_csu_sanofi_multiple_myeloma: Archival release (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.5542097
+
 Research repository for the vivarium_csu_sanofi_multiple_myeloma project.
 
 .. contents::
