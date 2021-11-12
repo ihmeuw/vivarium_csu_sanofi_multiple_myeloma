@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import NamedTuple, List
 
 import pandas as pd
+import itertools
+from loguru import logger
 import yaml
 
 from vivarium_csu_sanofi_multiple_myeloma.constants import results
@@ -27,18 +29,23 @@ OUTPUT_COLUMN_SORT_ORDER = [
     'input_draw'
 ]
 
+RENAME_COLUMNS = {
+    'age_group': 'age',
+    'race_and_cytogenetic_risk_at_diagnosis_ext': 'race_and_cytogenetic_risk_at_diagnosis',
+    'cause_of_death': 'cause',
+    'renal_function_at_diagnosis_ext': 'renal_function_at_diagnosis',
+}
 
 def make_measure_data(data):
+    # TODO: This is parallelizable
     measure_data = MeasureData(
         population=get_population_data(data),
-        person_time=get_measure_data(data, 'person_time', stratified_by_treatment=True, stratified_by_risks=True),
-        ylls=get_by_cause_measure_data(data, 'ylls', stratified_by_treatment=True, stratified_by_risks=True),
+        person_time=get_measure_data(data, 'person_time'),
+        ylls=get_by_cause_measure_data(data, 'ylls'),
         ylds=get_by_cause_measure_data(data, 'ylds'),
-        deaths=get_by_cause_measure_data(data, 'deaths', stratified_by_treatment=True, stratified_by_risks=True),
-        state_person_time=get_state_person_time_measure_data(data, 'state_person_time', stratified_by_treatment=True,
-                                                             stratified_by_risks=True),
-        transition_count=get_transition_count_measure_data(data, 'transition_count', stratified_by_treatment=True,
-                                                           stratified_by_risks=True),
+        deaths=get_by_cause_measure_data(data, 'deaths'),
+        state_person_time=get_state_person_time_measure_data(data, 'state_person_time'),
+        transition_count=get_transition_count_measure_data(data, 'transition_count'),
         treatment_count=get_treatment_count_measure_data(data, 'treatment_count'),
         survival=get_survival_measure_data(data),
         registry=get_registry_measure_data(data),
@@ -128,109 +135,73 @@ def pivot_data(data):
             .set_index(GROUPBY_COLUMNS)
             .stack()
             .reset_index()
-            .rename(columns={f'level_{len(GROUPBY_COLUMNS)}': 'process', 0: 'value'}))
+            .rename(columns={f'level_{len(GROUPBY_COLUMNS)}': 'key', 0: 'value'}))
 
 
 def sort_data(data):
     sort_order = [c for c in OUTPUT_COLUMN_SORT_ORDER if c in data.columns]
-    other_cols = [c for c in data.columns if c not in sort_order]
-    data = data[sort_order + other_cols].sort_values(sort_order)
+    other_cols = [c for c in data.columns if c not in sort_order and c != 'value']
+    data = data[sort_order + other_cols + ['value']].sort_values(sort_order)
     return data.reset_index(drop=True)
 
 
-def split_processing_column(data, stratified_by_treatment=False, stratified_by_risks=False):
-    # TODO find a better way to do this:
-    #       FutureWarning: Columnar iteration over characters will be deprecated in future releases.
-    if stratified_by_risks:
-        data['process'], data['renal_function_at_diagnosis'] = data.process.str.split(
-            '_renal_function_at_diagnosis_').str
-        data['process'], data['race_and_cytogenetic_risk_at_diagnosis'] = data.process.str.split(
-            '_race_and_cytogenetic_risk_at_diagnosis_').str
-    if stratified_by_treatment:
-        data['process'], data['retreated'] = data.process.str.split('_retreated_').str
-        data['process'], data['treatment'] = data.process.str.split('_treatment_state_').str
-    data['process'], data['age'] = data.process.str.split('_in_age_group_').str
-    data['process'], data['sex'] = data.process.str.split('_among_').str
-    data['year'] = data.process.str.split('_in_').str[-1]
-    data['measure'] = data.process.str.split('_in_').str[:-1].apply(lambda x: '_in_'.join(x))
-    return data.drop(columns='process')
+def apply_results_map(data, kind):
+    # TODO, maybe: handle custom 'measure' columns
+    logger.info(f"Mapping {kind} data to stratifications.")
+    map_df = results.RESULTS_MAP(kind)
+    data = data.set_index('key')
+    data = data.join(map_df).reset_index(drop=True)
+    data = data.rename(columns=RENAME_COLUMNS)
+    logger.info(f"Mapping {kind} complete.")
+    return data
 
-
-def new_split_processing_column(data, stratified_by_treatment=False, stratified_by_risks=False):
-    out = {'measure': [], 'year': [], 'sex': [], 'age': []}
-    if stratified_by_treatment:
-        out['treatment'] = []
-        out['retreated'] = []
-    if stratified_by_risks:
-        out['renal_function_at_diagnosis'] = []
-        out['race_and_cytogenetic_risk_at_diagnosis'] = []
-    out['value'] = []
-
-    for k, v in data.iterrows():
-        pass
-
-    # return data.drop(columns='process')
 
 def get_population_data(data):
     total_pop = pivot_data(data[[results.TOTAL_POPULATION_COLUMN]
                                 + results.RESULT_COLUMNS('population')
                                 + GROUPBY_COLUMNS])
-    total_pop = total_pop.rename(columns={'process': 'measure'})
+    total_pop = total_pop.rename(columns={'key': 'measure'})
     return sort_data(total_pop)
 
 
-def get_measure_data(data, measure, stratified_by_treatment=False, stratified_by_risks=False):
+def get_measure_data(data, measure):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
-    data = split_processing_column(data, stratified_by_treatment, stratified_by_risks)
+    data = apply_results_map(data, measure)
     return sort_data(data)
 
 
-def get_by_cause_measure_data(data, measure, stratified_by_treatment=False, stratified_by_risks=False):
-    data = get_measure_data(data, measure, stratified_by_treatment, stratified_by_risks)
-    data['measure'], data['cause'] = data.measure.str.split('_due_to_').str
+def get_by_cause_measure_data(data, measure):
+    data = get_measure_data(data, measure)
     return sort_data(data)
 
 
-def get_state_person_time_measure_data(data, measure, stratified_by_treatment, stratified_by_risks):
-    data = get_measure_data(data, measure, stratified_by_treatment, stratified_by_risks)
-    data['measure'], data['cause'] = 'state_person_time', data.measure.str.split('_person_time').str[0]
+def get_state_person_time_measure_data(data, measure):
+    data = get_measure_data(data, measure)
     return sort_data(data)
 
 
-def get_transition_count_measure_data(data, measure, stratified_by_treatment, stratified_by_risks):
+def get_transition_count_measure_data(data, measure):
     # Oops, edge case.
     data = data.drop(columns=[c for c in data.columns if 'event_count' in c and '2026' in c])
-    data = get_measure_data(data, measure, stratified_by_treatment, stratified_by_risks)
+    data = get_measure_data(data, measure)
     return sort_data(data)
 
 
 def get_treatment_count_measure_data(data, measure):
     data = pivot_data(data[results.RESULT_COLUMNS(measure) + GROUPBY_COLUMNS])
-    data['process'], data['year'] = data.process.str.split('_year_').str
-    data['process'], data['treatment'] = data.process.str.split('_treatment_').str
-    data['process'], data['treatment_line'] = data.process.str.split('line_').str
-    data = data.drop(columns='process')
+    data = apply_results_map(data, 'treatment_count')
     return sort_data(data)
 
 
 def get_survival_measure_data(data):
     data = pivot_data(data[results.RESULT_COLUMNS('survival_alive') + results.RESULT_COLUMNS('survival_other') + GROUPBY_COLUMNS])
-    for s in reversed(RISKS):
-        data['process'], data[s] = data.process.str.split('_' + s + '_').str
-    data['measure'], data['process'] = data.process.str.split('_period_').str
-    data['period'], data['treatment_line'] = data.process.str.split('_line_').str
-
-    data = data.drop(columns='process')
+    # TODO: how to combine 'survival_alive' + 'survival_other', write measure
+    data = apply_results_map(data, 'survival_alive')
     return sort_data(data)
 
 
 def get_registry_measure_data(data):
+    # TODO: write measure column
     data = pivot_data(data[results.RESULT_COLUMNS('registry_status') + GROUPBY_COLUMNS])
-    data['process'], data['renal_function_at_diagnosis'] = data.process.str.split('_renal_function_at_diagnosis_').str
-    data['process'], data['race_and_cytogenetic_risk_at_diagnosis'] = data.process.str.split('_race_and_cytogenetic_risk_at_diagnosis_').str
-    data['process'], data['age'] = data.process.str.split('_in_age_group_').str
-    data['process'], data['sex'] = data.process.str.split('_among_').str
-    data['year'] = data.process.str.split('_in_').str[-1]
-    data['measure'] = data.process.str.split('_in_').str[:-1].apply(lambda x: '_in_'.join(x))
-    data = data.drop(columns='process')
+    data = apply_results_map(data, 'registry_status')
     return sort_data(data)

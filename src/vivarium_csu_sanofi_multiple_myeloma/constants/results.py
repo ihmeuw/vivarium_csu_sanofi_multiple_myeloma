@@ -145,25 +145,18 @@ def RESULT_COLUMNS(kind='all'):
             columns.append(template.format(**{field: value for field, value in zip(fields, value_group)}))
     return columns
 
-# Spit out full string of results columns + mapping to results map fn -> df
-def RESULTS_MAP(kind='all'):
-    if kind not in COLUMN_TEMPLATES and kind != 'all':
+
+def RESULTS_MAP(kind):
+    if kind not in COLUMN_TEMPLATES:
         raise ValueError(f'Unknown result column type {kind}')
     columns = []
-    if kind == 'all':
-        # construct list of dataframes
-        for k in COLUMN_TEMPLATES:
-            # Add rows to df
-            df += RESULTS_MAP(k)
-        # TODO: handle STANDARD_COLUMNS
-        # columns = list(STANDARD_COLUMNS.values()) + columns
-    else:
-        # Add rows to df
-        rows = []
-        template = COLUMN_TEMPLATES[kind]
-        filtered_field_map = {field: values
-                              for field, values in TEMPLATE_FIELD_MAP.items() if f'{{{field}}}' in template}
-        fields, value_groups = filtered_field_map.keys(), itertools.product(*filtered_field_map.values())
-        for value_group in value_groups:
-            columns.append(template.format(**{field: value for field, value in zip(fields, value_group)}))
-    return df
+    template = COLUMN_TEMPLATES[kind]
+    filtered_field_map = {field: values
+                          for field, values in TEMPLATE_FIELD_MAP.items() if f'{{{field}}}' in template}
+    fields, value_groups = list(filtered_field_map.keys()), list(itertools.product(*filtered_field_map.values()))
+    for value_group in value_groups:
+        columns.append(template.format(**{field: value for field, value in zip(fields, value_group)}))
+    df = pd.DataFrame(value_groups, columns=map(lambda x: x.lower(), fields))
+    df['key'] = columns
+    df['measure'] = kind  # per researcher feedback, this column is useful, even when it's identical for all rows
+    return df.set_index('key').sort_index()
